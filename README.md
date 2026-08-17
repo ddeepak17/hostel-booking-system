@@ -40,11 +40,57 @@ Property
 
 ## Development Status
 
-Day 1 foundation completed:
+### Day 1 — Project Foundation
 
-- Frontend application setup
-- Backend application setup
-- MongoDB Atlas connection
+Completed:
+
+- Frontend application setup with React and Vite
+- Tailwind CSS configuration
+- React Router setup
+- Axios API configuration
+- Backend setup with Node.js and Express
+- MongoDB Atlas connection using Mongoose
+- Environment variable configuration
 - Express health endpoint
 - Frontend-to-backend API connection
-- Initial project architecture
+- Project folder architecture
+- Git and GitHub setup
+- Backend deployment on Render
+- Frontend deployment on Vercel
+- Production frontend-to-backend connection
+
+### Day 2 — Authentication and Authorization
+
+Completed:
+
+- User model with Mongoose validation
+- Password hashing using bcrypt
+- Customer registration
+- Login API
+- JWT token generation and verification
+- Protected authentication middleware
+- Role-based authorization middleware
+- Customer, Property Owner, and Super Admin role support
+- Current-user endpoint
+- Duplicate email handling
+- Invalid login handling
+- React registration form using Formik and Yup
+- React login form
+- Axios JWT interceptor
+- Auth context and session restoration
+- Persistent authentication
+- Logout functionality
+- Protected frontend routes
+- Role-based dashboard routing
+- Local authentication testing
+- Production authentication testing
+
+### Next
+
+Day 3 will focus on the property management structure:
+
+Property  
+→ Building  
+→ Floor  
+→ Room  
+→ Bed
