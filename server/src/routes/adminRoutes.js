@@ -5,12 +5,20 @@ import {
   authorize,
 } from "../middleware/authMiddleware.js";
 
+import {
+  createOwner,
+  getOwners,
+} from "../controllers/adminUserController.js";
+
 const router = Router();
+
+router.use(
+  protect,
+  authorize("superAdmin")
+);
 
 router.get(
   "/dashboard",
-  protect,
-  authorize("superAdmin"),
   (req, res) => {
     res.status(200).json({
       success: true,
@@ -19,5 +27,10 @@ router.get(
     });
   }
 );
+
+router
+  .route("/owners")
+  .get(getOwners)
+  .post(createOwner);
 
 export default router;
