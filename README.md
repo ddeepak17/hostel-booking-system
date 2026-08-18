@@ -85,12 +85,31 @@ Completed:
 - Local authentication testing
 - Production authentication testing
 
+### Day 3 — Property Management Backend
+
+Completed:
+
+- Secure Super Admin provisioning
+- Super Admin account testing
+- Property Owner creation by Super Admin
+- Property Owner authentication
+- Property model
+- Building model
+- Floor model
+- Room model
+- Bed model
+- Property ownership authorization
+- Property management API
+- Building management API
+- Floor management API
+- Room management API
+- Bed management API
+- Room pricing
+- Room capacity enforcement
+- Bed availability management
+- Cross-owner access protection
+- Privileged role testing
+
 ### Next
 
-Day 3 will focus on the property management structure:
-
-Property  
-→ Building  
-→ Floor  
-→ Room  
-→ Bed
+Day 4 will focus on the booking engine, including booking requests, approval/rejection, cancellations, bed reservation state, and tenant management.
