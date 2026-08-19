@@ -110,6 +110,41 @@ Completed:
 - Cross-owner access protection
 - Privileged role testing
 
+### Day 4 — Booking Engine
+
+Completed:
+
+- Booking model
+- Customer booking requests
+- Automatic property, room, owner, and pricing resolution
+- Booking price snapshots
+- Check-in date validation
+- Pending booking workflow
+- Atomic bed reservation
+- Double-booking prevention
+- Owner booking management
+- Booking approval
+- Booking rejection
+- Customer cancellation
+- Booking completion
+- Bed status synchronization
+- Current tenant management
+- Booking history
+- Invalid booking-state protection
+- Customer/Owner role protection
+- Cross-owner booking isolation
+- Booking-controlled bed states
+
 ### Next
 
-Day 4 will focus on the booking engine, including booking requests, approval/rejection, cancellations, bed reservation state, and tenant management.
+Day 5 will focus on the Customer Experience, including:
+
+- Public property discovery
+- Property search and filtering
+- Property details
+- Room and bed availability
+- Pricing display
+- Customer booking UI
+- Booking history
+- Booking cancellation
+- Customer profile

@@ -2,15 +2,27 @@
 
 ## 1. Overview
 
-The PG / Hostel Room Booking System is a full-stack MERN application that supports three primary user roles:
+The PG / Hostel Room Booking System is a full-stack MERN application for discovering, managing, and booking PG/hostel accommodation.
+
+The application supports three primary user roles:
 
 - Customer
 - Property Owner
 - Super Admin
 
-The application separates authentication, authorization, property ownership, accommodation structure, and booking logic so that each area can be developed and secured independently.
+The system separates:
 
-The core production architecture is:
+- Authentication
+- Role authorization
+- Resource ownership
+- Property management
+- Room and bed availability
+- Booking state
+- Tenant state
+
+This separation keeps security and business logic on the backend instead of trusting the frontend.
+
+The overall production architecture is:
 
 ```text
 React Frontend
@@ -21,7 +33,9 @@ Express REST API
       ↓
 Authentication / Authorization Middleware
       ↓
-Controllers / Business Logic
+Controllers
+      ↓
+Business / Ownership Logic
       ↓
 Mongoose Models
       ↓
@@ -32,7 +46,7 @@ The frontend is deployed using Vercel.
 
 The backend API is deployed using Render.
 
-MongoDB Atlas is used as the production database.
+MongoDB Atlas is used as the application database.
 
 ---
 
@@ -84,7 +98,7 @@ MongoDB Atlas
 
 ## 3. Application Layers
 
-The backend currently follows this request flow:
+A typical backend request follows:
 
 ```text
 HTTP Request
@@ -97,7 +111,7 @@ Role Authorization
       ↓
 Controller
       ↓
-Ownership / Business Logic
+Ownership / Business Rules
       ↓
 Mongoose Model
       ↓
@@ -105,8 +119,6 @@ MongoDB
       ↓
 HTTP Response
 ```
-
-The project also contains folders for reusable services and utilities as the application grows.
 
 ### Backend Structure
 
@@ -148,7 +160,7 @@ client/
 
 ## 4. User Roles
 
-The system has three user roles.
+The system contains three roles:
 
 ```text
 User
@@ -167,43 +179,44 @@ Their role is automatically assigned as:
 customer
 ```
 
-Customers cannot assign themselves privileged roles.
+Customers cannot choose privileged roles during registration.
 
 ### Property Owner
 
-Property Owners manage accommodation properties and their internal structure.
+Property Owners manage:
 
-Property Owner accounts are created by an authenticated Super Admin.
+- Properties
+- Buildings
+- Floors
+- Rooms
+- Beds
+- Booking requests
+- Current tenants
+
+Property Owner accounts are created by a Super Admin.
 
 ### Super Admin
 
-The Super Admin manages privileged platform operations including Property Owner accounts.
+The Super Admin manages privileged platform operations.
 
-The initial Super Admin is not created through public registration.
-
-It is provisioned using a secure server-side seed script.
+The initial Super Admin is provisioned using a server-side seed script rather than public registration.
 
 ---
 
 ## 5. Privileged User Provisioning
 
-Public registration creates Customer accounts only.
+Normal registration creates Customer accounts only.
 
-The API does not accept a user-supplied privileged role during normal registration.
+A public request cannot assign:
 
-This prevents a request such as:
-
-```json
-{
-  "role": "superAdmin"
-}
+```text
+owner
+superAdmin
 ```
 
-from creating an administrator account.
+to itself.
 
 ### Initial Super Admin
-
-The initial Super Admin is provisioned using environment variables and a server-side seed script.
 
 ```text
 Environment Variables
@@ -212,60 +225,100 @@ Seed Script
         ↓
 User Model
         ↓
-bcrypt Password Hash
+bcrypt Password Hashing
         ↓
 Super Admin Account
 ```
 
 ### Property Owner Creation
 
-After the Super Admin exists:
-
 ```text
-Super Admin
-      ↓
-Authenticated Admin API
-      ↓
-Create Property Owner
-      ↓
-Password Hashed
-      ↓
-Owner Saved to MongoDB
+Authenticated Super Admin
+        ↓
+POST /api/admin/owners
+        ↓
+Validate Owner Information
+        ↓
+Hash Password
+        ↓
+Create User with role = owner
+        ↓
+Store createdBy reference
 ```
 
-The created Owner stores a reference to the Super Admin that created the account through:
-
-```text
-User.createdBy
-```
+This avoids allowing normal users to create privileged accounts.
 
 ---
 
-## 6. Authentication Architecture
+## 6. User Model
+
+The User model represents all application users.
+
+```text
+User
+├── name
+├── email
+├── password
+├── phone
+├── role
+├── avatar
+├── isActive
+├── createdBy
+├── createdAt
+└── updatedAt
+```
+
+### Roles
+
+```text
+customer
+owner
+superAdmin
+```
+
+### Password Storage
+
+Plain-text passwords are never stored.
+
+```text
+Plain Password
+      ↓
+bcrypt
+      ↓
+Password Hash
+      ↓
+MongoDB
+```
+
+Password comparison during login uses bcrypt rather than reversing or decrypting the stored password.
+
+---
+
+## 7. Authentication Architecture
 
 Authentication uses JSON Web Tokens.
 
-### Registration Flow
+### Customer Registration
 
 ```text
-Customer Registration Form
-        ↓
+Registration Form
+      ↓
 POST /api/auth/register
-        ↓
-Validate User Data
-        ↓
-Check Existing Email
-        ↓
-bcrypt Hash Password
-        ↓
-Create User
-        ↓
+      ↓
+Validate Data
+      ↓
+Check Duplicate Email
+      ↓
+Hash Password
+      ↓
+Create Customer
+      ↓
 Generate JWT
-        ↓
+      ↓
 Return User + Token
 ```
 
-### Login Flow
+### Login
 
 ```text
 Email + Password
@@ -283,42 +336,42 @@ Generate JWT
 Return User + Token
 ```
 
-### Authenticated Request Flow
+### Authenticated API Request
 
 ```text
 Frontend
-   ↓
+      ↓
 Authorization: Bearer <JWT>
-   ↓
+      ↓
 protect Middleware
-   ↓
-Verify JWT
-   ↓
-Read User ID from Token
-   ↓
+      ↓
+jwt.verify()
+      ↓
+Read User ID
+      ↓
 Load Current User from MongoDB
-   ↓
+      ↓
 req.user
-   ↓
-Protected Controller
+      ↓
+Protected Route
 ```
 
-The current user is loaded from MongoDB after token verification rather than trusting role information stored only inside the JWT.
+The application reloads the current User from MongoDB after JWT verification.
 
-This ensures current account state and current role information are used for authorization.
+This ensures authorization uses the User's current role and active status.
 
 ---
 
-## 7. Authorization Architecture
+## 8. Authorization Architecture
 
-Authentication and authorization are treated separately.
+Authentication and authorization are separate concerns.
 
 ### Authentication
 
 Answers:
 
 ```text
-Who is this user?
+Who is making this request?
 ```
 
 Handled by:
@@ -332,7 +385,7 @@ protect
 Answers:
 
 ```text
-Is this type of user allowed to access this route?
+Is this role allowed to use this route?
 ```
 
 Handled by:
@@ -349,51 +402,88 @@ authorize("owner")
 authorize("superAdmin")
 ```
 
-### HTTP Status Behaviour
+### Resource Ownership
+
+For Property Owner resources, there is a third check:
 
 ```text
-401 Unauthorized
-→ User is not successfully authenticated.
+Does this resource actually belong to this Owner?
+```
 
-403 Forbidden
-→ User is authenticated but does not have the required role.
+Therefore:
+
+```text
+Authentication
+      ↓
+Role Authorization
+      ↓
+Resource Ownership
+      ↓
+Business Logic
 ```
 
 ---
 
-## 8. Frontend Authentication
+## 9. HTTP Security Responses
 
-The frontend maintains authentication through an Auth Context.
+The application distinguishes between authentication and authorization failures.
+
+```text
+401 Unauthorized
+→ Authentication is missing, invalid, or expired.
+
+403 Forbidden
+→ User is authenticated but does not have the required role.
+
+404 Not Found
+→ Resource does not exist or is outside the authenticated Owner's permitted resource set.
+
+409 Conflict
+→ Request conflicts with current application state.
+```
+
+Examples of `409 Conflict` include:
+
+- Booking an unavailable bed
+- Trying to reject an approved booking
+- Manually modifying a booking-controlled bed
+- Duplicate active booking conflicts
+
+---
+
+## 10. Frontend Authentication
+
+Authentication state is maintained through React Auth Context.
 
 ```text
 Login / Register
       ↓
-API Returns JWT
+Backend Returns JWT
       ↓
 Token Stored Locally
       ↓
 Axios Interceptor
       ↓
-Authorization Header Added Automatically
+Authorization Header
 ```
 
-When the application reloads:
+On refresh:
 
 ```text
-AuthProvider Starts
+AuthProvider
       ↓
-Check Existing Token
+Read Existing Token
       ↓
 GET /api/auth/me
       ↓
-Backend Verifies JWT
+Verify JWT
       ↓
-Current User Returned
+Return Current User
       ↓
-Session Restored
+Restore Session
 ```
 
-Frontend routes are also protected by role.
+Frontend protected routes currently include:
 
 ```text
 /customer/dashboard
@@ -406,13 +496,15 @@ Frontend routes are also protected by role.
 → superAdmin
 ```
 
-Frontend route protection improves the user experience, but backend authorization remains the actual security boundary.
+Frontend route protection is used for navigation and user experience.
+
+Backend authorization remains the actual security boundary.
 
 ---
 
-# 9. Core Property Hierarchy
+# 11. Core Property Hierarchy
 
-The accommodation system uses the following hierarchy:
+The accommodation structure is:
 
 ```text
 Property Owner
@@ -428,15 +520,13 @@ Room
 Bed
 ```
 
-Each level is stored as a separate MongoDB collection and linked through ObjectId references.
-
-This prevents the Property model from becoming one deeply nested document and gives each resource its own lifecycle.
+Each level is stored as its own collection and linked through MongoDB ObjectId references.
 
 ---
 
-# 10. Core Models
+# 12. Current Core Models
 
-The planned application contains the following primary models:
+Currently implemented core models are:
 
 - User
 - Property
@@ -445,68 +535,18 @@ The planned application contains the following primary models:
 - Room
 - Bed
 - Booking
+
+Later application stages add:
+
 - Review
 - Complaint
 - PlatformSetting
 
-The following models are currently implemented:
-
-- User
-- Property
-- Building
-- Floor
-- Room
-- Bed
-
-Booking and the remaining platform models are implemented in later stages.
-
 ---
 
-# 11. User Model
+# 13. Property Model
 
-The User model stores identity and authorization information.
-
-```text
-User
-├── name
-├── email
-├── password
-├── phone
-├── role
-├── avatar
-├── isActive
-├── createdBy
-├── createdAt
-└── updatedAt
-```
-
-Supported roles:
-
-```text
-customer
-owner
-superAdmin
-```
-
-Passwords are never stored in plain text.
-
-Before a new or modified password is saved:
-
-```text
-Plain Password
-      ↓
-bcrypt
-      ↓
-Password Hash
-      ↓
-MongoDB
-```
-
----
-
-# 12. Property Model
-
-A Property represents one PG or hostel location.
+A Property represents one hostel or PG location.
 
 ```text
 Property
@@ -531,7 +571,9 @@ published
 inactive
 ```
 
-### Address Structure
+Only active, published properties are considered bookable.
+
+### Address
 
 ```text
 address
@@ -543,9 +585,7 @@ address
 └── country
 ```
 
-### Location Structure
-
-Location is designed to support geographic search and map integration.
+### Geographic Location
 
 ```text
 location
@@ -555,13 +595,11 @@ location
     └── latitude
 ```
 
-A geospatial index is used on the location field.
+The structure prepares the application for later geographic search and Google Maps integration.
 
 ---
 
-# 13. Building Model
-
-A property may contain one or more buildings.
+# 14. Building Model
 
 ```text
 Building
@@ -573,21 +611,11 @@ Building
 └── updatedAt
 ```
 
-Building names must be unique within the same property.
-
-Example:
-
-```text
-Harbour View Student Residence
-├── Main Building
-└── Annex Building
-```
+Building names are unique within the same Property.
 
 ---
 
-# 14. Floor Model
-
-Each Building can contain multiple Floors.
+# 15. Floor Model
 
 ```text
 Floor
@@ -599,23 +627,11 @@ Floor
 └── updatedAt
 ```
 
-A floor number must be unique within a Building.
-
-Example:
-
-```text
-Main Building
-├── Floor 0
-├── Floor 1
-├── Floor 2
-└── Floor 3
-```
+Floor numbers are unique within each Building.
 
 ---
 
-# 15. Room Model
-
-A Floor contains Rooms.
+# 16. Room Model
 
 ```text
 Room
@@ -633,8 +649,6 @@ Room
 
 ### Room Types
 
-Supported room types currently include:
-
 ```text
 single
 double
@@ -645,26 +659,18 @@ dormitory
 
 ### Pricing
 
-Pricing is currently configured at the Room level.
-
 ```text
 monthlyRent
 securityDeposit
 ```
 
-Example:
-
-```text
-Room 101
-├── monthlyRent: 900
-└── securityDeposit: 500
-```
+Pricing is currently configured at the Room level.
 
 ---
 
-# 16. Room Capacity
+# 17. Room Capacity
 
-Every room defines its maximum number of active Beds.
+Each Room defines a maximum number of active Beds.
 
 Example:
 
@@ -680,33 +686,17 @@ Bed A
 Bed B
 ```
 
-Not allowed:
+Blocked:
 
 ```text
 Bed C
 ```
 
-The application prevents creation of active Beds beyond the Room's configured capacity.
-
-The Room capacity also cannot be reduced below its current number of active Beds.
-
-Example:
-
-```text
-Active Beds = 2
-
-Attempt:
-capacity = 1
-
-Result:
-Rejected
-```
+The system also prevents reducing Room capacity below the number of currently active Beds.
 
 ---
 
-# 17. Bed Model
-
-Rooms contain individual bookable Beds.
+# 18. Bed Model
 
 ```text
 Bed
@@ -720,8 +710,6 @@ Bed
 
 ### Bed Status
 
-Beds support:
-
 ```text
 available
 reserved
@@ -729,29 +717,27 @@ occupied
 unavailable
 ```
 
-At the current stage, Property Owners can manually change Beds only between:
+### Responsibility for Bed Status
+
+Property Owners manually control:
 
 ```text
 available
 unavailable
 ```
 
-The states:
+The Booking Engine controls:
 
 ```text
 reserved
 occupied
 ```
 
-are reserved for the Booking workflow.
-
-This prevents an Owner from manually bypassing booking state transitions.
+This separation prevents Owners from manually bypassing booking state.
 
 ---
 
-# 18. Model Relationships
-
-The core database relationships are:
+# 19. Property Relationships
 
 ```text
 Property.owner
@@ -770,71 +756,47 @@ Bed.room
 → Room
 ```
 
-Complete relationship path:
+Full hierarchy:
 
 ```text
-User
- ↓
+User (Owner)
+      ↓
 Property
- ↓
+      ↓
 Building
- ↓
+      ↓
 Floor
- ↓
+      ↓
 Room
- ↓
+      ↓
 Bed
 ```
 
 ---
 
-# 19. Property Ownership Authorization
+# 20. Property Ownership Authorization
 
-Role authorization alone is not sufficient.
+Role authorization alone is insufficient.
 
-An authenticated Property Owner must only be allowed to access their own accommodation data.
-
-The application therefore performs three separate security checks.
+For an Owner request:
 
 ```text
-1. Authentication
-   ↓
-Is the user logged in?
-
-2. Role Authorization
-   ↓
-Is the user a Property Owner?
-
-3. Resource Ownership
-   ↓
-Does this resource actually belong to this Owner?
+1. Is the user authenticated?
+2. Is role === owner?
+3. Does the resource belong to this Owner?
 ```
 
----
-
-# 20. Direct Property Ownership
-
-A Property directly contains its Owner reference.
-
-Ownership can therefore be checked using:
+### Direct Property Ownership
 
 ```text
 Property._id = requested property
 AND
-Property.owner = authenticated owner
+Property.owner = authenticated Owner
 ```
 
-If the resource does not match the authenticated Owner, it is not returned.
+### Nested Ownership
 
----
-
-# 21. Nested Ownership
-
-Nested resources do not directly store the Owner.
-
-Ownership is resolved through the hierarchy.
-
-### Building Ownership
+#### Building
 
 ```text
 Building
@@ -844,7 +806,7 @@ Property
 Owner
 ```
 
-### Floor Ownership
+#### Floor
 
 ```text
 Floor
@@ -856,7 +818,7 @@ Property
 Owner
 ```
 
-### Room Ownership
+#### Room
 
 ```text
 Room
@@ -870,7 +832,7 @@ Property
 Owner
 ```
 
-### Bed Ownership
+#### Bed
 
 ```text
 Bed
@@ -886,13 +848,13 @@ Property
 Owner
 ```
 
-Mongoose population is used to resolve these parent relationships during ownership checks.
+Mongoose population is used to walk these relationships during ownership validation.
 
 ---
 
-# 22. Cross-Owner Isolation
+# 21. Cross-Owner Isolation
 
-The application is designed so one Property Owner cannot access another Owner's resources.
+An Owner must never access another Owner's accommodation data.
 
 Example:
 
@@ -908,7 +870,7 @@ Owner B
 └── Property B
 ```
 
-Owner B must not be able to:
+Owner B cannot:
 
 - Read Property A
 - Update Property A
@@ -917,29 +879,27 @@ Owner B must not be able to:
 - Modify Room A
 - Modify Bed A
 
-Even if Owner B obtains the MongoDB ObjectId.
+Even if Owner B knows the resource ObjectId.
 
-For ownership-restricted queries, inaccessible resources are returned as:
+Unauthorized cross-owner resources return:
 
 ```text
 404 Not Found
 ```
 
-instead of revealing that another Owner's resource exists.
+rather than exposing that the resource exists.
 
 ---
 
-# 23. Property Owner API Structure
+# 22. Property Owner Management API
 
-All Property Owner management routes are protected by:
+All routes are protected by:
 
 ```text
 protect
       ↓
 authorize("owner")
 ```
-
-The current Owner API structure includes:
 
 ## Properties
 
@@ -994,11 +954,9 @@ DELETE /api/owner/beds/:bedId
 
 ---
 
-# 24. Soft Deactivation
+# 23. Soft Deactivation
 
-Property resources are not permanently removed by normal DELETE operations.
-
-Instead, they are soft-deactivated.
+Property resources use soft deactivation instead of immediate permanent deletion.
 
 Example:
 
@@ -1015,11 +973,756 @@ isActive = false
 status = unavailable
 ```
 
-This design protects historical data once Bookings reference these resources.
+This preserves historical references that may later be needed by Bookings.
+
+Beds controlled by active Bookings cannot be manually deactivated.
 
 ---
 
-# 25. Admin API Structure
+# 24. Booking Model
+
+The Booking model connects a Customer to a specific Bed.
+
+```text
+Booking
+├── customer → User
+├── owner → User
+├── property → Property
+├── room → Room
+├── bed → Bed
+├── monthlyRentAtBooking
+├── securityDepositAtBooking
+├── checkInDate
+├── status
+├── customerNote
+├── ownerNote
+├── cancellationReason
+├── isActiveBooking
+├── approvedAt
+├── rejectedAt
+├── cancelledAt
+├── completedAt
+├── createdAt
+└── updatedAt
+```
+
+---
+
+# 25. Booking Price Snapshot
+
+A Booking stores:
+
+```text
+monthlyRentAtBooking
+securityDepositAtBooking
+```
+
+rather than depending only on the Room's current price.
+
+Example:
+
+```text
+Customer books:
+monthlyRent = 900
+
+Later Owner changes Room:
+monthlyRent = 950
+```
+
+The historical Booking still records:
+
+```text
+monthlyRentAtBooking = 900
+```
+
+This preserves the price associated with the original booking request.
+
+---
+
+# 26. Booking Context Resolution
+
+The Customer does not determine sensitive booking fields.
+
+The Customer submits:
+
+```text
+bedId
+checkInDate
+customerNote
+```
+
+The backend derives:
+
+```text
+Bed
+ ↓
+Room
+ ↓
+Floor
+ ↓
+Building
+ ↓
+Property
+ ↓
+Owner
+```
+
+The backend then determines:
+
+- Property
+- Owner
+- Room
+- Monthly rent
+- Security deposit
+
+This prevents the Customer from sending manipulated values such as a fake Owner ID or lower rent.
+
+---
+
+# 27. Bookable Resource Validation
+
+A Bed is considered bookable only when its hierarchy is valid.
+
+The application verifies:
+
+```text
+Bed is active
+AND
+Room is active
+AND
+Floor is active
+AND
+Building is active
+AND
+Property is active
+AND
+Property.status = published
+```
+
+The Bed must also have:
+
+```text
+status = available
+```
+
+before a new booking request can claim it.
+
+---
+
+# 28. Booking Lifecycle
+
+Supported statuses are:
+
+```text
+pending
+approved
+rejected
+cancelled
+completed
+```
+
+The normal lifecycle is:
+
+```text
+available bed
+      ↓
+Customer submits booking
+      ↓
+pending
+      ↓
+Owner decision
+```
+
+Owner can approve:
+
+```text
+pending
+   ↓
+approved
+```
+
+or reject:
+
+```text
+pending
+   ↓
+rejected
+```
+
+An eligible active Booking may become:
+
+```text
+pending
+   ↓
+cancelled
+```
+
+or:
+
+```text
+approved
+   ↓
+cancelled
+```
+
+A successful completed stay becomes:
+
+```text
+approved
+   ↓
+completed
+```
+
+Overall:
+
+```text
+                  ┌──────────→ rejected
+                  │
+pending ──────────┼──────────→ approved ─────────→ completed
+   │              │               │
+   │              │               ↓
+   └──────────────┴────────────→ cancelled
+```
+
+Invalid transitions return a conflict rather than silently modifying the Booking.
+
+---
+
+# 29. Active Booking State
+
+A Booking contains:
+
+```text
+isActiveBooking
+```
+
+Active states include:
+
+```text
+pending
+approved
+```
+
+Inactive historical states include:
+
+```text
+rejected
+cancelled
+completed
+```
+
+When a Booking reaches one of those final states:
+
+```text
+isActiveBooking = false
+```
+
+---
+
+# 30. Double-Booking Prevention
+
+The Booking Engine uses two layers of protection.
+
+## Layer 1 — Atomic Bed Claim
+
+The Customer does not simply read:
+
+```text
+status = available
+```
+
+and later update it.
+
+Instead, MongoDB is asked to update only a Bed that still matches:
+
+```text
+_id = requested Bed
+status = available
+isActive = true
+```
+
+Then:
+
+```text
+available
+   ↓ atomic update
+reserved
+```
+
+If another Customer has already changed it:
+
+```text
+reserved
+```
+
+the atomic update fails.
+
+This helps prevent two simultaneous requests from claiming the same Bed.
+
+## Layer 2 — Active Booking Database Constraint
+
+The Booking collection uses a unique partial index so a Bed cannot have more than one active Booking.
+
+Conceptually:
+
+```text
+bed = X
+AND
+isActiveBooking = true
+```
+
+must be unique.
+
+Historical rejected, cancelled, and completed Bookings can still reference the same Bed because:
+
+```text
+isActiveBooking = false
+```
+
+---
+
+# 31. Booking Creation Flow
+
+```text
+Customer
+   ↓
+POST /api/customer/bookings
+   ↓
+Validate bedId
+   ↓
+Validate check-in date
+   ↓
+Resolve Bed hierarchy
+   ↓
+Validate Property / Building / Floor / Room / Bed
+   ↓
+Ensure Bed = available
+   ↓
+Atomically change Bed
+available → reserved
+   ↓
+Create Booking
+status = pending
+   ↓
+Store price snapshot
+   ↓
+Return Booking
+```
+
+If Booking creation fails after the Bed was claimed, the controller attempts to release:
+
+```text
+reserved → available
+```
+
+so inventory is not unnecessarily left locked.
+
+---
+
+# 32. Bed and Booking Synchronization
+
+The Booking state controls the Bed state.
+
+## New Booking
+
+```text
+Booking:
+none → pending
+
+Bed:
+available → reserved
+```
+
+## Approval
+
+```text
+Booking:
+pending → approved
+
+Bed:
+reserved → occupied
+```
+
+## Rejection
+
+```text
+Booking:
+pending → rejected
+
+Bed:
+reserved → available
+```
+
+## Customer Cancellation
+
+```text
+Booking:
+pending / approved → cancelled
+
+Bed:
+reserved / occupied → available
+```
+
+## Completion
+
+```text
+Booking:
+approved → completed
+
+Bed:
+occupied → available
+```
+
+---
+
+# 33. Booking-Controlled Bed Protection
+
+Owners may manually manage Beds only when they are not controlled by an active Booking.
+
+Allowed manual states:
+
+```text
+available ↔ unavailable
+```
+
+Blocked manual changes:
+
+```text
+reserved → unavailable
+reserved → available
+
+occupied → unavailable
+occupied → available
+```
+
+A request attempting to manually modify a `reserved` or `occupied` Bed returns:
+
+```text
+409 Conflict
+```
+
+The Owner also cannot deactivate a Bed while its status is:
+
+```text
+reserved
+occupied
+```
+
+---
+
+# 34. Customer Booking API
+
+Customer booking routes require:
+
+```text
+protect
+      ↓
+authorize("customer")
+```
+
+Current endpoints:
+
+```text
+GET  /api/customer/bookings
+POST /api/customer/bookings
+```
+
+Customer booking detail:
+
+```text
+GET /api/customer/bookings/:bookingId
+```
+
+Customer cancellation:
+
+```text
+PATCH /api/customer/bookings/:bookingId/cancel
+```
+
+Customers can access only their own Bookings.
+
+---
+
+# 35. Owner Booking API
+
+Owner booking routes require:
+
+```text
+protect
+      ↓
+authorize("owner")
+```
+
+### List Bookings
+
+```text
+GET /api/owner/bookings
+```
+
+Optional status filter:
+
+```text
+GET /api/owner/bookings?status=pending
+```
+
+### Booking Detail
+
+```text
+GET /api/owner/bookings/:bookingId
+```
+
+### Approve
+
+```text
+PATCH /api/owner/bookings/:bookingId/approve
+```
+
+### Reject
+
+```text
+PATCH /api/owner/bookings/:bookingId/reject
+```
+
+### Complete
+
+```text
+PATCH /api/owner/bookings/:bookingId/complete
+```
+
+An Owner query always includes:
+
+```text
+owner = req.user._id
+```
+
+so another Owner cannot retrieve or modify the Booking.
+
+---
+
+# 36. Booking Authorization
+
+Booking security involves multiple levels.
+
+### Customer
+
+A Customer can:
+
+- Create their own booking request
+- View their own Bookings
+- View one of their own Bookings
+- Cancel an eligible Booking
+
+A Customer cannot:
+
+- Approve a Booking
+- Reject a Booking
+- Complete a Booking
+- Access another Customer's Booking
+
+### Property Owner
+
+An Owner can:
+
+- View Bookings for their own properties
+- Approve their own Booking requests
+- Reject their own Booking requests
+- Complete their own approved Bookings
+- View their current tenants
+
+An Owner cannot:
+
+- Manage another Owner's Booking
+- Read another Owner's Booking
+- Use booking actions on unrelated properties
+
+---
+
+# 37. Cross-Owner Booking Isolation
+
+Each Booking stores:
+
+```text
+owner → User
+```
+
+Owner API queries include:
+
+```text
+owner = authenticated Owner
+```
+
+Example:
+
+```text
+Owner A
+└── Booking A
+
+Owner B
+```
+
+Even if Owner B knows:
+
+```text
+Booking A._id
+```
+
+the query does not return Booking A.
+
+The response is:
+
+```text
+404 Booking not found
+```
+
+---
+
+# 38. Booking State Validation
+
+State transitions are deliberately restricted.
+
+Examples:
+
+```text
+pending → approved ✅
+pending → rejected ✅
+pending → cancelled ✅
+
+approved → completed ✅
+approved → cancelled ✅
+
+approved → rejected ❌
+completed → cancelled ❌
+rejected → approved ❌
+```
+
+Invalid transitions return:
+
+```text
+409 Conflict
+```
+
+rather than altering history incorrectly.
+
+---
+
+# 39. Check-In Date Validation
+
+New Booking requests require a valid check-in date.
+
+The backend rejects:
+
+```text
+Invalid date format
+```
+
+and:
+
+```text
+Check-in date in the past
+```
+
+before the Bed is reserved.
+
+---
+
+# 40. Tenant Architecture
+
+A separate Tenant model is not currently required.
+
+An active approved Booking represents a current tenant.
+
+```text
+Booking.status = approved
+AND
+Booking.isActiveBooking = true
+```
+
+means:
+
+```text
+Current Tenant
+```
+
+Owner endpoint:
+
+```text
+GET /api/owner/tenants
+```
+
+returns these approved active Bookings populated with Customer information.
+
+When the Booking becomes:
+
+```text
+cancelled
+completed
+```
+
+it is no longer part of the current tenant list.
+
+---
+
+# 41. Current Booking History
+
+Customer history contains all of the Customer's Bookings, including final states.
+
+Example:
+
+```text
+Booking 1 → rejected
+Booking 2 → cancelled
+Booking 3 → completed
+```
+
+Historical Bookings remain in MongoDB instead of being deleted.
+
+This preserves:
+
+- Pricing history
+- Booking history
+- Property references
+- Customer history
+- Owner history
+
+---
+
+# 42. Booking Data Population
+
+Booking responses can populate referenced resources for readable API responses.
+
+Customer Booking responses include information such as:
+
+```text
+Property
+├── name
+├── address
+├── images
+└── status
+
+Room
+├── roomNumber
+├── roomType
+├── capacity
+├── monthlyRent
+└── securityDeposit
+
+Bed
+├── bedNumber
+└── status
+```
+
+Owner responses additionally populate Customer information such as:
+
+```text
+name
+email
+phone
+avatar
+```
+
+---
+
+# 43. Admin API
 
 Super Admin routes require:
 
@@ -1029,238 +1732,22 @@ protect
 authorize("superAdmin")
 ```
 
-Current privileged-user management includes:
+Currently implemented:
 
 ```text
-GET  /api/admin/dashboard
+GET /api/admin/dashboard
 
 GET  /api/admin/owners
 POST /api/admin/owners
 ```
 
-Property Owner accounts are therefore created through an authenticated administrative workflow rather than public registration.
-
-Additional Super Admin functionality is added in later stages.
+Additional Admin functionality is implemented during the later Super Admin development stage.
 
 ---
 
-# 26. Booking Architecture
+# 44. Property Image Architecture
 
-The Booking system is the next major application layer.
-
-The intended relationship is:
-
-```text
-Customer
-   ↓
-Property
-   ↓
-Room
-   ↓
-Bed
-   ↓
-Booking
-```
-
-A Booking will connect:
-
-```text
-Booking
-├── customer → User
-├── property → Property
-├── room → Room
-├── bed → Bed
-├── price
-├── checkInDate
-├── status
-├── createdAt
-└── updatedAt
-```
-
-The final Booking model and transaction rules are implemented during the Booking Engine stage.
-
----
-
-# 27. Booking Lifecycle
-
-A Booking begins as:
-
-```text
-pending
-```
-
-The Property Owner can then:
-
-```text
-pending
-   ↓
-approved
-```
-
-or:
-
-```text
-pending
-   ↓
-rejected
-```
-
-The Customer may also cancel eligible Bookings:
-
-```text
-pending
-   ↓
-cancelled
-```
-
-or where permitted:
-
-```text
-approved
-   ↓
-cancelled
-```
-
-After an approved stay is finished:
-
-```text
-approved
-   ↓
-completed
-```
-
-Full state model:
-
-```text
-                ┌──────────→ rejected
-                │
-pending ────────┼──────────→ approved ───────→ completed
-                │                │
-                │                ↓
-                └──────────→ cancelled
-```
-
----
-
-# 28. Planned Bed / Booking Synchronization
-
-The Booking Engine will control reservation-related Bed states.
-
-Intended flow:
-
-```text
-Bed = available
-      ↓
-Customer requests booking
-      ↓
-Booking = pending
-      ↓
-Bed protected from competing booking requests
-      ↓
-Owner reviews booking
-```
-
-If approved:
-
-```text
-Booking = approved
-Bed = reserved / occupied
-```
-
-If rejected:
-
-```text
-Booking = rejected
-Bed = available
-```
-
-If cancelled:
-
-```text
-Booking = cancelled
-Bed = available
-```
-
-The booking implementation must prevent two customers from successfully booking the same Bed at the same time.
-
----
-
-# 29. Planned Customer Experience
-
-Customer functionality will include:
-
-```text
-Browse Properties
-      ↓
-Search / Filter
-      ↓
-Property Details
-      ↓
-Rooms
-      ↓
-Available Beds
-      ↓
-Pricing
-      ↓
-Booking Request
-      ↓
-Booking Status
-      ↓
-Booking History
-```
-
-Customers will also be able to manage their profile and submit reviews/ratings.
-
----
-
-# 30. Planned Property Owner Experience
-
-The Property Owner interface will expose the backend hierarchy visually.
-
-```text
-Owner Dashboard
-      ↓
-Properties
-      ↓
-Buildings
-      ↓
-Floors
-      ↓
-Rooms
-      ↓
-Beds
-```
-
-Additional Owner functionality will include:
-
-- Booking management
-- Approve/reject booking requests
-- Tenant management
-- Property images
-- Revenue reporting
-- Availability management
-
----
-
-# 31. Planned Super Admin Experience
-
-The final Super Admin dashboard will support:
-
-- Manage Property Owners
-- Manage Users
-- Manage PG/Hostel properties
-- View all Bookings
-- View platform revenue
-- Manage complaints
-- Manage platform settings
-
----
-
-# 32. Image Architecture
-
-Property image support is planned using Cloudinary or a similar hosted media provider.
-
-The Property model already supports image metadata in the form:
+The Property model already supports:
 
 ```text
 images[]
@@ -1269,29 +1756,39 @@ images[]
 └── alt
 ```
 
-The upload workflow is implemented in a later stage.
+A hosted media provider such as Cloudinary is planned for the Owner experience stage.
+
+Actual image-upload functionality is not yet part of the current backend stage.
 
 ---
 
-# 33. Map Architecture
+# 45. Map Architecture
 
-Properties include geographic location data:
+Properties support GeoJSON-style location data:
 
 ```text
-GeoJSON Point
-├── longitude
-└── latitude
+location
+├── type: Point
+└── coordinates
+    ├── longitude
+    └── latitude
 ```
 
-This provides the database structure required for later Google Maps integration and geographic property search.
+This prepares the database for later:
+
+- Google Maps display
+- Location search
+- Distance-based discovery
+
+Map UI integration is a later development stage.
 
 ---
 
-# 34. Environment Variables
+# 46. Environment Variables
 
-Sensitive configuration is stored outside source control.
+Sensitive configuration remains outside source control.
 
-Backend environment variables include values such as:
+Backend configuration includes:
 
 ```text
 PORT
@@ -1305,33 +1802,37 @@ SUPER_ADMIN_EMAIL
 SUPER_ADMIN_PASSWORD
 ```
 
-Real `.env` files are excluded from Git.
+Real `.env` files are ignored by Git.
 
-`.env.example` contains only variable names and safe placeholders.
+`.env.example` contains variable names without production secrets.
 
 ---
 
-# 35. Deployment Architecture
-
-## Local Development
+# 47. Local Development Architecture
 
 ```text
 React
 localhost:5173
       ↓
+Axios
+      ↓
 Express
 localhost:5001
+      ↓
+Mongoose
       ↓
 MongoDB Atlas
 ```
 
-## Production
+---
+
+# 48. Production Architecture
 
 ```text
 Vercel
 React Frontend
       ↓
-HTTPS / Axios
+HTTPS
       ↓
 Render
 Express Backend
@@ -1341,29 +1842,39 @@ Mongoose
 MongoDB Atlas
 ```
 
-Production and local environments maintain separate configuration values where appropriate.
+Local and production JWT secrets may be different.
+
+Therefore:
+
+```text
+Local JWT
+→ Local Backend
+
+Production JWT
+→ Production Backend
+```
+
+Tokens should not be assumed interchangeable between environments.
 
 ---
 
-# 36. Security Principles
+# 49. Security Principles
 
-The architecture currently follows these security principles:
+Current architecture follows these principles.
 
-### Password Security
+## Password Security
 
-```text
-Plain Password
-      ↓
-bcrypt
-      ↓
-Hash Only Stored
-```
+Passwords are stored using bcrypt hashes.
 
-### JWT Verification
+## JWT Authentication
 
-Protected APIs require a valid signed JWT.
+Protected APIs require valid signed JWTs.
 
-### Role-Based Access Control
+## Current User Lookup
+
+JWT verification is followed by loading the current User from MongoDB.
+
+## Role-Based Access Control
 
 ```text
 Customer
@@ -1371,69 +1882,89 @@ Property Owner
 Super Admin
 ```
 
-have separate permissions.
+have separate backend permissions.
 
-### Ownership Authorization
+## Ownership Authorization
 
-A Property Owner must own the requested resource.
+Property Owners can access only their own resources.
 
-### Privilege Protection
+## Privilege Protection
 
-Public users cannot choose privileged roles during registration.
+Public registration cannot create Owner or Super Admin accounts.
 
-### Sensitive Configuration
+## Server-Derived Booking Data
 
-Secrets remain in environment variables and are excluded from Git.
+Customers cannot dictate Owner IDs, Property IDs, or prices during Booking creation.
 
-### Resource History
+## Atomic Inventory Claim
 
-Core property resources are soft-deactivated instead of immediately destroyed.
+Beds are atomically moved from:
+
+```text
+available → reserved
+```
+
+when Booking creation begins.
+
+## Database Double-Booking Protection
+
+Only one active Booking may reference a Bed.
+
+## Booking-Controlled Inventory
+
+Owners cannot manually override `reserved` or `occupied` Beds.
+
+## Historical Preservation
+
+Bookings and property resources use historical records / soft-deactivation instead of blindly deleting referenced data.
 
 ---
 
-# 37. Current Development State
+# 50. Current Implementation Status
 
-## Completed
+## Day 1 — Foundation
 
-### Foundation
+Completed:
 
-- React/Vite frontend
+- React/Vite setup
 - Tailwind CSS
 - React Router
 - Axios
 - Express backend
 - MongoDB Atlas
 - Mongoose
-- Render deployment
-- Vercel deployment
+- Environment variables
+- Git/GitHub
+- Render backend deployment
+- Vercel frontend deployment
 - Production frontend/backend communication
 
-### Authentication
+## Day 2 — Authentication and Authorization
+
+Completed:
 
 - User model
+- bcrypt password hashing
 - Customer registration
 - Login
-- bcrypt password hashing
-- JWT creation
+- JWT generation
 - JWT verification
-- Auth middleware
-- Current-user endpoint
-- Persistent frontend authentication
-- Logout
-- Protected frontend routes
-
-### Authorization
-
+- Authentication middleware
+- Role authorization
 - Customer role
 - Property Owner role
 - Super Admin role
-- Role-based backend protection
-- Role-based frontend routing
-- Secure Super Admin provisioning
+- Persistent frontend authentication
+- Protected frontend routing
+- Privileged dashboard routing
+
+## Day 3 — Property Management Backend
+
+Completed:
+
+- Super Admin provisioning
 - Super Admin-created Property Owners
-
-### Property Management Backend
-
+- Property Owner authentication
 - Property model
 - Building model
 - Floor model
@@ -1444,49 +1975,124 @@ Core property resources are soft-deactivated instead of immediately destroyed.
 - Floor CRUD
 - Room CRUD
 - Bed CRUD
-- Ownership authorization
-- Cross-owner isolation
-- Room pricing
-- Security deposits
-- Capacity enforcement
+- Pricing
+- Security deposit
+- Room capacity
 - Bed availability
-- Soft deactivation
+- Property ownership authorization
+- Cross-owner resource isolation
+
+## Day 4 — Booking Engine
+
+Implemented / being verified:
+
+- Booking model
+- Booking references
+- Price snapshots
+- Check-in date validation
+- Customer booking creation
+- Atomic Bed reservation
+- Double-booking prevention
+- Customer booking history
+- Customer booking detail
+- Customer cancellation
+- Owner Booking list
+- Booking status filtering
+- Owner Booking detail
+- Booking approval
+- Booking rejection
+- Booking completion
+- Bed-state synchronization
+- Tenant derivation
+- Cross-owner Booking isolation
+- Invalid transition protection
+- Booking-controlled Bed-state protection
+
+Day 4 is considered fully complete only after the remaining local and production verification steps pass.
 
 ---
 
-# 38. Next Development Stage
+# 51. Next Development Stage — Customer Experience
 
-The next major system is the Booking Engine.
+The next stage turns the backend systems into a complete Customer-facing application.
 
-It will implement:
+Planned flow:
 
 ```text
-Customer Booking Request
-        ↓
-Booking Validation
-        ↓
-Double-Booking Prevention
-        ↓
-Pending Booking
-        ↓
-Owner Approval / Rejection
-        ↓
-Bed Status Synchronization
-        ↓
-Tenant Management
-        ↓
-Cancellation / Completion
+Homepage
+   ↓
+Property Discovery
+   ↓
+Search / Filters
+   ↓
+Property Details
+   ↓
+Room Options
+   ↓
+Available Beds
+   ↓
+Pricing
+   ↓
+Booking Form
+   ↓
+Booking Request
+   ↓
+Booking History / Status
 ```
 
-After the Booking Engine is complete, development proceeds to:
+Day 5 will include:
 
-1. Customer-facing property and booking UI
-2. Property Owner management UI
-3. Property image uploads
-4. Revenue reporting
-5. Super Admin management features
-6. Reviews and ratings
-7. Complaints and platform settings
-8. Google Maps integration
-9. Security and validation audit
-10. Final production testing and polish
+- Public property discovery
+- Search/filtering
+- Property details
+- Room display
+- Bed availability display
+- Pricing
+- Booking form
+- Booking history
+- Cancellation UI
+- Customer profile
+
+---
+
+# 52. Later Development Stages
+
+After the Customer Experience:
+
+## Owner Experience
+
+- Owner dashboard
+- Property-management UI
+- Building/Floor/Room/Bed UI
+- Booking approval/rejection UI
+- Tenant management
+- Revenue data
+- Property images
+
+## Super Admin
+
+- Owner management
+- User management
+- Property oversight
+- All Bookings
+- Platform revenue
+- Complaints
+- Platform settings
+
+## Remaining Product Features
+
+- Reviews and ratings
+- Cloudinary image uploads
+- Google Maps integration
+
+## Final Production Pass
+
+- Centralized errors
+- Validation audit
+- Rate limiting
+- Security audit
+- NoSQL-injection protection
+- Responsive design
+- Loading/error/empty states
+- End-to-end role testing
+- Final production verification
