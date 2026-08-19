@@ -137,6 +137,28 @@ export async function updateBed(
         "status"
       )
     ) {
+      /*
+        A reserved or occupied bed
+        is controlled by the Booking
+        Engine.
+
+        The Owner must not manually
+        override that state.
+      */
+
+      if (
+        [
+          "reserved",
+          "occupied",
+        ].includes(bed.status)
+      ) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "This bed's status is controlled by an active booking",
+        });
+      }
+
       const allowedManualStatuses =
         [
           "available",
@@ -186,27 +208,57 @@ export async function deactivateBed(
   req,
   res
 ) {
-  const bed =
-    await getOwnedBed(
-      req.params.bedId,
-      req.user._id
-    );
+  try {
+    const bed =
+      await getOwnedBed(
+        req.params.bedId,
+        req.user._id
+      );
 
-  if (!bed) {
-    return res.status(404).json({
+    if (!bed) {
+      return res.status(404).json({
+        success: false,
+        message: "Bed not found",
+      });
+    }
+
+    /*
+      Do not allow an Owner to
+      deactivate a bed that currently
+      belongs to an active Booking.
+
+      Otherwise DELETE could bypass
+      the protection in updateBed().
+    */
+
+    if (
+      [
+        "reserved",
+        "occupied",
+      ].includes(bed.status)
+    ) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "A bed with an active booking cannot be deactivated",
+      });
+    }
+
+    bed.isActive = false;
+    bed.status = "unavailable";
+
+    await bed.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Bed deactivated",
+    });
+  } catch (error) {
+    return res.status(400).json({
       success: false,
-      message: "Bed not found",
+      message:
+        "Unable to deactivate bed",
     });
   }
-
-  bed.isActive = false;
-  bed.status = "unavailable";
-
-  await bed.save();
-
-  return res.status(200).json({
-    success: true,
-    message:
-      "Bed deactivated",
-  });
 }

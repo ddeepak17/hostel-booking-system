@@ -41,12 +41,30 @@ import {
   deactivateBed,
 } from "../controllers/bedController.js";
 
+import {
+  getOwnerBookings,
+  getOwnerBooking,
+  approveBooking,
+  rejectBooking,
+  completeBooking,
+  getCurrentTenants,
+} from "../controllers/ownerBookingController.js";
+
 const router = Router();
+
+/*
+  Every route below this point requires:
+
+  1. A valid authenticated user
+  2. role === "owner"
+*/
 
 router.use(
   protect,
   authorize("owner")
 );
+
+// Dashboard
 
 router.get(
   "/dashboard",
@@ -59,7 +77,9 @@ router.get(
   }
 );
 
+// --------------------------------
 // Properties
+// --------------------------------
 
 router
   .route("/properties")
@@ -74,7 +94,9 @@ router
   .patch(updateProperty)
   .delete(deactivateProperty);
 
+// --------------------------------
 // Buildings
+// --------------------------------
 
 router
   .route(
@@ -90,7 +112,9 @@ router
   .patch(updateBuilding)
   .delete(deactivateBuilding);
 
+// --------------------------------
 // Floors
+// --------------------------------
 
 router
   .route(
@@ -104,7 +128,9 @@ router
   .patch(updateFloor)
   .delete(deactivateFloor);
 
+// --------------------------------
 // Rooms
+// --------------------------------
 
 router
   .route(
@@ -118,7 +144,9 @@ router
   .patch(updateRoom)
   .delete(deactivateRoom);
 
+// --------------------------------
 // Beds
+// --------------------------------
 
 router
   .route(
@@ -131,5 +159,43 @@ router
   .route("/beds/:bedId")
   .patch(updateBed)
   .delete(deactivateBed);
+
+// --------------------------------
+// Bookings
+// --------------------------------
+
+router.get(
+  "/bookings",
+  getOwnerBookings
+);
+
+router.get(
+  "/bookings/:bookingId",
+  getOwnerBooking
+);
+
+router.patch(
+  "/bookings/:bookingId/approve",
+  approveBooking
+);
+
+router.patch(
+  "/bookings/:bookingId/reject",
+  rejectBooking
+);
+
+router.patch(
+  "/bookings/:bookingId/complete",
+  completeBooking
+);
+
+// --------------------------------
+// Current Tenants
+// --------------------------------
+
+router.get(
+  "/tenants",
+  getCurrentTenants
+);
 
 export default router;
