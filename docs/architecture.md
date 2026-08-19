@@ -1984,7 +1984,7 @@ Completed:
 
 ## Day 4 — Booking Engine
 
-Implemented / being verified:
+Completed:
 
 - Booking model
 - Booking references
