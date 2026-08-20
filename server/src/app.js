@@ -7,6 +7,9 @@ import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import ownerRoutes from "./routes/ownerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import publicPropertyRoutes from "./routes/publicPropertyRoutes.js";
+import publicRoomRoutes from "./routes/publicRoomRoutes.js";
+import publicBedRoutes from "./routes/publicBedRoutes.js";
 
 const app = express();
 
@@ -38,5 +41,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/properties", publicPropertyRoutes);
+app.use("/api/rooms", publicRoomRoutes);
+app.use("/api/beds", publicBedRoutes);
 
 export default app;

@@ -2,103 +2,348 @@ import {
   Link,
   Route,
   Routes,
-} from "react-router";
+} from "react-router-dom";
+
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
+
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import MyBookings from "./pages/customer/MyBookings";
+
+
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
+
+import PropertyList from "./pages/customer/PropertyList";
+import PropertyDetails from "./pages/customer/PropertyDetails";
+
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+
+
 function HomePage() {
+
   return (
+
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+
+
       <div className="text-center">
+
+
         <h1 className="text-4xl font-bold text-slate-900">
+
           PG / Hostel Room Booking System
+
         </h1>
 
+
+
         <p className="mt-3 text-slate-600">
+
           Find and book accommodation.
+
         </p>
 
+
+
+
         <div className="mt-6 flex justify-center gap-3">
-          <Link
-            to="/login"
-            className="rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white"
-          >
-            Login
-          </Link>
+
 
           <Link
-            to="/register"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900"
+
+            to="/login"
+
+            className="
+              rounded-lg
+              bg-slate-900
+              px-5
+              py-3
+              font-semibold
+              text-white
+            "
+
           >
-            Register
+
+            Login
+
           </Link>
+
+
+
+
+          <Link
+
+            to="/register"
+
+            className="
+              rounded-lg
+              border
+              border-slate-300
+              bg-white
+              px-5
+              py-3
+              font-semibold
+              text-slate-900
+            "
+
+          >
+
+            Register
+
+          </Link>
+
+
         </div>
+
+
       </div>
+
+
     </main>
+
   );
+
 }
 
+
+
+
+
 function App() {
+
+
   return (
+
+
     <Routes>
+
+
+
       <Route
+
         path="/"
-        element={<HomePage />}
+
+        element={
+          <HomePage />
+        }
+
       />
 
+
+
+
+
       <Route
+
         path="/login"
-        element={<LoginPage />}
+
+        element={
+          <LoginPage />
+        }
+
       />
 
+
+
+
+
       <Route
+
         path="/register"
-        element={<RegisterPage />}
+
+        element={
+          <RegisterPage />
+        }
+
       />
 
+
+
+
+
       <Route
+
+        path="/properties"
+
+        element={
+          <PropertyList />
+        }
+
+      />
+
+
+
+
+
+      <Route
+
+        path="/properties/:propertyId"
+
+        element={
+          <PropertyDetails />
+        }
+
+      />
+
+
+
+
+
+
+      <Route
+
         path="/customer/dashboard"
+
         element={
+
           <ProtectedRoute
-            allowedRoles={["customer"]}
+
+            allowedRoles={[
+              "customer",
+            ]}
+
           >
+
             <CustomerDashboard />
+
           </ProtectedRoute>
+
         }
+
       />
 
+
+
+
+
       <Route
-        path="/owner/dashboard"
+
+        path="/customer/bookings"
+
         element={
+
+
           <ProtectedRoute
-            allowedRoles={["owner"]}
+
+            allowedRoles={[
+              "customer",
+            ]}
+
           >
-            <OwnerDashboard />
+
+
+            <MyBookings />
+
+
           </ProtectedRoute>
+
+
         }
+
       />
 
+
+
+
+
+
       <Route
-        path="/admin/dashboard"
+
+        path="/owner/dashboard"
+
         element={
+
+
           <ProtectedRoute
+
+            allowedRoles={[
+              "owner",
+            ]}
+
+          >
+
+            <OwnerDashboard />
+
+          </ProtectedRoute>
+
+
+        }
+
+      />
+
+
+
+
+
+
+
+      <Route
+
+        path="/admin/dashboard"
+
+        element={
+
+
+          <ProtectedRoute
+
             allowedRoles={[
               "superAdmin",
             ]}
+
           >
+
             <AdminDashboard />
+
           </ProtectedRoute>
+
+
         }
+
       />
+
+
+
+
+
+
+      <Route
+
+        path="*"
+
+        element={
+
+          <div className="p-8">
+
+            <h1 className="text-3xl font-bold">
+
+              Page Not Found
+
+            </h1>
+
+
+          </div>
+
+        }
+
+      />
+
+
+
+
+
     </Routes>
+
+
   );
+
 }
+
+
 
 export default App;
