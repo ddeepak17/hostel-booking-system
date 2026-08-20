@@ -1,6 +1,6 @@
 # PG / Hostel Room Booking System
 
-A full-stack MERN application for discovering, managing, and booking PG/hostel accommodation.
+A full-stack multi-role hostel accommodation platform that enables customers to discover properties, reserve beds, and manage booking workflows through secure role-based access control.
 
 ## Technology Stack
 
@@ -135,16 +135,44 @@ Completed:
 - Cross-owner booking isolation
 - Booking-controlled bed states
 
-### Next
+## Day 5 — Customer Experience
 
-Day 5 will focus on the Customer Experience, including:
+Completed:
 
 - Public property discovery
-- Property search and filtering
-- Property details
-- Room and bed availability
+- Property listing page
+- Property details page
+- Room availability display
+- Bed availability display
 - Pricing display
-- Customer booking UI
-- Booking history
+- Customer booking interface
+- Customer booking history
 - Booking cancellation
-- Customer profile
+- Protected customer routes
+- Frontend loading and error states
+
+
+## Current Development Stage
+
+The customer booking workflow is complete.
+
+The next development phase focuses on the Owner experience:
+
+- Owner dashboard
+- View booking requests
+- Approve/reject bookings
+- Bed state synchronization
+- Tenant management UI
+- Property management UI improvements
+
+
+## Future Improvements
+
+- Search and filtering
+- Property images
+- Cloudinary integration
+- Google Maps integration
+- Payments
+- Notifications
+- Reviews and ratings
+- Analytics dashboard
