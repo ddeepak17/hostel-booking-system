@@ -7,7 +7,6 @@ import {
   useParams,
 } from "react-router-dom";
 
-
 import {
   getProperty,
   getPropertyRooms,
@@ -16,531 +15,484 @@ import {
 } from "../../api/propertyApi";
 
 
-
 export default function PropertyDetails() {
-
-
   const {
     propertyId,
   } = useParams();
 
 
-
   const [
     property,
-    setProperty
+    setProperty,
   ] = useState(null);
-
-
 
   const [
     rooms,
-    setRooms
+    setRooms,
   ] = useState([]);
-
-
 
   const [
     beds,
-    setBeds
+    setBeds,
   ] = useState({});
 
-
+  const [
+    checkInDate,
+    setCheckInDate,
+  ] = useState("");
 
   const [
     loading,
-    setLoading
+    setLoading,
   ] = useState(true);
-
-
 
   const [
     error,
-    setError
+    setError,
   ] = useState("");
 
 
-
-
   useEffect(() => {
-
-
     async function loadProperty() {
-
       try {
-
-
         const propertyData =
-          await getProperty(propertyId);
-
-
+          await getProperty(
+            propertyId
+          );
 
         const roomsData =
-          await getPropertyRooms(propertyId);
-
-
+          await getPropertyRooms(
+            propertyId
+          );
 
         setProperty(
           propertyData.property
         );
 
-
-
         setRooms(
-          roomsData.rooms || []
+          Array.isArray(
+            roomsData.rooms
+          )
+            ? roomsData.rooms
+            : []
         );
-
-
-      } catch(error) {
-
-
+      } catch (error) {
         console.error(error);
 
-
         setError(
-          "Unable to load property"
+          error.response?.data?.message ||
+            "Unable to load property"
         );
-
-
       } finally {
-
-
         setLoading(false);
-
-
       }
-
     }
 
-
-
     loadProperty();
-
-
   }, [propertyId]);
 
 
-
-
-
-
-  async function showBeds(roomId) {
-
-
+  async function showBeds(
+    roomId
+  ) {
     try {
-
-
       const data =
-        await getRoomBeds(roomId);
+        await getRoomBeds(
+          roomId
+        );
 
+      setBeds(
+        (currentBeds) => ({
+          ...currentBeds,
 
-
-      setBeds({
-
-        ...beds,
-
-        [roomId]:
-          data.beds || []
-
-      });
-
-
-
-    } catch(error) {
-
-
+          [roomId]:
+            Array.isArray(
+              data.beds
+            )
+              ? data.beds
+              : [],
+        })
+      );
+    } catch (error) {
       console.error(error);
 
-
       alert(
-        "Unable to load beds"
+        error.response?.data?.message ||
+          "Unable to load beds"
+      );
+    }
+  }
+
+
+  async function bookBed(
+    bedId,
+    roomId
+  ) {
+    if (!checkInDate) {
+      alert(
+        "Please select a check-in date before booking."
       );
 
-
+      return;
     }
 
+    try {
+      const data =
+        await createBooking({
+          bedId,
+          checkInDate,
+        });
+
+      alert(
+        data.message ||
+          "Booking request submitted!"
+      );
+
+      await showBeds(
+        roomId
+      );
+    } catch (error) {
+      console.error(
+        error.response?.data ||
+          error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to create booking"
+      );
+    }
   }
-
-
-
-
-
-
-  async function bookBed(bedId, roomId) {
-
-  try {
-
-    const data =
-      await createBooking({
-
-        bedId,
-
-        checkInDate:
-          new Date(
-            Date.now() -
-            new Date().getTimezoneOffset() * 60000
-          )
-          .toISOString()
-          .split("T")[0],
-
-      });
-
-
-    alert(
-      data.message ||
-      "Booking request submitted!"
-    );
-
-
-    await showBeds(roomId);
-
-
-  } catch(error) {
-
-    console.error(
-      error.response?.data ||
-      error
-    );
-
-
-    alert(
-      error.response?.data?.message ||
-      "Unable to create booking"
-    );
-
-  }
-
-}
-
-
-
-
-
 
 
   if (loading) {
-
-
     return (
+      <main className="min-h-screen bg-slate-100 p-8">
 
-      <div className="p-8">
+        <div className="mx-auto max-w-5xl">
+          Loading property...
+        </div>
 
-        Loading property...
-
-      </div>
-
+      </main>
     );
-
-
   }
-
-
-
-
 
 
   if (error) {
-
-
     return (
+      <main className="min-h-screen bg-slate-100 p-8">
 
-      <div className="p-8 text-red-600">
+        <div className="mx-auto max-w-5xl rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+          {error}
+        </div>
 
-        {error}
-
-      </div>
-
+      </main>
     );
-
-
   }
 
 
+  if (!property) {
+    return (
+      <main className="min-h-screen bg-slate-100 p-8">
 
+        <div className="mx-auto max-w-5xl">
+          Property not found.
+        </div>
 
-
+      </main>
+    );
+  }
 
 
   return (
+    <main className="min-h-screen bg-slate-100 p-8">
+
+      <div className="mx-auto max-w-5xl">
+
+        <section className="rounded-xl bg-white p-6 shadow-sm">
+
+          <h1 className="text-3xl font-bold text-slate-900">
+            {property.name}
+          </h1>
+
+          <p className="mt-3 text-slate-600">
+            {property.description}
+          </p>
 
 
-    <div className="min-h-screen bg-slate-100 p-8">
+          {
+            property.address && (
+              <p className="mt-3 text-sm text-slate-500">
+                {
+                  [
+                    property.address.line1,
+                    property.address.city,
+                    property.address.state,
+                    property.address.postalCode,
+                    property.address.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
+                }
+              </p>
+            )
+          }
 
 
-      <h1 className="text-3xl font-bold">
+          {
+            Array.isArray(
+              property.amenities
+            ) &&
+            property.amenities.length >
+              0 && (
 
-        {property.name}
+              <div className="mt-5">
 
-      </h1>
+                <h2 className="font-bold text-slate-900">
+                  Amenities
+                </h2>
 
+                <ul className="mt-2 flex flex-wrap gap-2">
 
+                  {
+                    property.amenities.map(
+                      (amenity) => (
 
+                        <li
+                          key={amenity}
+                          className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"
+                        >
+                          {amenity}
+                        </li>
 
-      <p className="mt-3 text-slate-600">
+                      )
+                    )
+                  }
 
-        {property.description}
+                </ul>
 
-      </p>
+              </div>
 
+            )
+          }
 
-
-
-
-      {
-        property.amenities &&
-        property.amenities.length > 0 && (
-
-
-          <div className="mt-5">
-
-
-            <h2 className="font-bold">
-
-              Amenities
-
-            </h2>
-
-
-
-            <ul className="mt-2 list-disc pl-5">
+        </section>
 
 
-              {
-                property.amenities.map(
-                  (amenity) => (
+        <section className="mt-8">
 
-                    <li key={amenity}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
-                      {amenity}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Rooms
+              </h2>
 
-                    </li>
+              <p className="mt-1 text-slate-600">
+                Choose a check-in date and then select an available bed.
+              </p>
+            </div>
 
+
+            <label className="block">
+
+              <span className="mb-1 block text-sm font-semibold text-slate-700">
+                Check-in date
+              </span>
+
+              <input
+                type="date"
+                value={
+                  checkInDate
+                }
+                onChange={(
+                  event
+                ) =>
+                  setCheckInDate(
+                    event.target.value
                   )
-                )
-              }
+                }
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2"
+              />
 
-
-            </ul>
-
+            </label>
 
           </div>
 
 
-        )
-      }
-
-
-
-
-
-
-
-      <h2 className="mt-8 text-2xl font-bold">
-
-        Rooms
-
-      </h2>
-
-
-
-
-
-
-
-      {
-        rooms.map(
-
-          (room) => (
-
-
-            <div
-
-              key={room._id}
-
-              className="mt-4 rounded-lg bg-white p-5 shadow"
-
-            >
-
-
-              <h3 className="text-xl font-bold">
-
-                Room {room.roomNumber}
-
-              </h3>
-
-
-
-              <p>
-
-                Type: {room.roomType}
-
-              </p>
-
-
-
-              <p>
-
-                Capacity: {room.capacity}
-
-              </p>
-
-
-
-              <p>
-
-                Rent: ${room.monthlyRent}/month
-
-              </p>
-
-
-
-
-
-              <button
-
-                onClick={() =>
-                  showBeds(room._id)
-                }
-
-                className="mt-4 rounded bg-slate-900 px-4 py-2 text-white"
-
-              >
-
-                View Beds
-
-              </button>
-
-
-
-
-
-
-
-              {
-                beds[room._id] && (
-
-
-                  <div className="mt-5">
-
-
-                    <h4 className="font-bold">
-
-                      Beds
-
-                    </h4>
-
-
-
-
-
+          {
+            rooms.length === 0 ? (
+
+              <div className="mt-5 rounded-xl bg-white p-6 shadow-sm">
+
+                <p className="text-slate-600">
+                  No rooms are currently available for this property.
+                </p>
+
+              </div>
+
+            ) : (
+
+              rooms.map(
+                (room) => (
+
+                  <article
+                    key={room._id}
+                    className="mt-5 rounded-xl bg-white p-6 shadow-sm"
+                  >
+
+                    <h3 className="text-xl font-bold text-slate-900">
+                      Room{" "}
+                      {
+                        room.roomNumber
+                      }
+                    </h3>
+
+                    <div className="mt-3 grid gap-2 sm:grid-cols-3">
+
+                      <p>
+                        <strong>
+                          Type:
+                        </strong>{" "}
+                        {room.roomType}
+                      </p>
+
+                      <p>
+                        <strong>
+                          Capacity:
+                        </strong>{" "}
+                        {room.capacity}
+                      </p>
+
+                      <p>
+                        <strong>
+                          Rent:
+                        </strong>{" "}
+                        $
+                        {
+                          room.monthlyRent
+                        }
+                        /month
+                      </p>
+
+                    </div>
+
+
+                    <button
+                      onClick={() =>
+                        showBeds(
+                          room._id
+                        )
+                      }
+                      className="mt-5 rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white"
+                    >
+                      View Beds
+                    </button>
 
 
                     {
-                      beds[room._id].map(
+                      beds[
+                        room._id
+                      ] && (
 
-                        (bed) => (
+                        <div className="mt-5 border-t pt-5">
 
-
-                          <div
-
-                            key={bed._id}
-
-                            className="mt-3 rounded border bg-white p-4"
-
-                          >
+                          <h4 className="font-bold text-slate-900">
+                            Beds
+                          </h4>
 
 
+                          {
+                            beds[
+                              room._id
+                            ].length ===
+                            0 ? (
 
-                            <p>
+                              <p className="mt-3 text-slate-600">
+                                No beds found for this room.
+                              </p>
 
-                              Bed {bed.bedNumber}
+                            ) : (
 
-                            </p>
+                              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+
+                                {
+                                  beds[
+                                    room._id
+                                  ].map(
+                                    (
+                                      bed
+                                    ) => (
+
+                                      <div
+                                        key={
+                                          bed._id
+                                        }
+                                        className="rounded-lg border p-4"
+                                      >
+
+                                        <p className="font-semibold">
+                                          Bed{" "}
+                                          {
+                                            bed.bedNumber
+                                          }
+                                        </p>
+
+                                        <p className="mt-1 text-sm capitalize text-slate-600">
+                                          Status:{" "}
+                                          {
+                                            bed.status
+                                          }
+                                        </p>
 
 
+                                        {
+                                          bed.status ===
+                                            "available" && (
 
+                                            <button
+                                              onClick={() =>
+                                                bookBed(
+                                                  bed._id,
+                                                  room._id
+                                                )
+                                              }
+                                              className="mt-3 rounded-lg bg-green-600 px-4 py-2 font-semibold text-white"
+                                            >
+                                              Book Now
+                                            </button>
 
-                            <p>
+                                          )
+                                        }
 
-                              Status: {bed.status}
+                                      </div>
 
-                            </p>
-
-
-
-
-
-
-
-                            {
-                              bed.status === "available" && (
-
-
-                                <button
-
-                                  onClick={() =>
-                                    bookBed(
-                                      bed._id,
-                                      room._id
                                     )
-                                  }
+                                  )
+                                }
 
-                                  className="mt-3 rounded bg-green-600 px-4 py-2 text-white"
+                              </div>
 
-                                >
+                            )
+                          }
 
-                                  Book Now
-
-                                </button>
-
-
-                              )
-                            }
-
-
-
-
-
-
-                          </div>
-
-
-                        )
+                        </div>
 
                       )
                     }
 
-
-
-
-                  </div>
-
+                  </article>
 
                 )
-              }
+              )
 
+            )
+          }
 
+        </section>
 
+      </div>
 
-
-
-            </div>
-
-
-          )
-
-        )
-      }
-
-
-
-
-
-
-    </div>
-
-
+    </main>
   );
-
-
 }
