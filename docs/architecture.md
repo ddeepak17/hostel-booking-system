@@ -489,7 +489,16 @@ Frontend protected routes currently include:
 /customer/dashboard
 → customer
 
+/customer/bookings
+→ customer
+
 /owner/dashboard
+→ owner
+
+/owner/bookings
+→ owner
+
+/owner/tenants
 → owner
 
 /admin/dashboard
@@ -2008,8 +2017,6 @@ Completed:
 - Invalid transition protection
 - Booking-controlled Bed-state protection
 
-Day 4 is considered fully complete only after the remaining local and production verification steps pass.
-
 ---
 
 ## Day 5 — Customer Experience
@@ -2035,68 +2042,167 @@ Customer booking workflow is complete.
 
 ---
 
-# 51. Current Development Stage — Customer Experience
+## Day 6 — Property Owner Experience
 
 Completed:
 
-- Public property discovery
-- Property listing
-- Property details
-- Room display
-- Bed availability display
-- Pricing display
-- Customer booking flow
-- Booking history
-- Booking cancellation UI
-- Protected customer routes
+- Owner frontend API integration
+- Property Owner dashboard
+- Property summary
+- Pending Booking summary
+- Approved Booking summary
+- Current Tenant summary
+- Active monthly-rent summary
+- Owner Booking-management page
+- Booking status filtering
+- Booking approval UI
+- Booking rejection UI
+- Booking completion UI
+- Current Tenant-management page
+- Customer information display
+- Owner Booking notes
+- Booking and Bed-state synchronization verification
+- Customer-to-Owner booking workflow verification
+- Owner-to-Customer status propagation
+- Protected Owner frontend routes
+- Customer isolation from Owner frontend routes
+- Customer check-in date selection
+- Frontend lint cleanup
+- Local production build verification
+- Vercel production verification
 
-Remaining customer improvements:
+Current status:
 
-- Search and filtering
-- Customer profile
-- UI polish
-- Image-based property browsing
+The Customer booking lifecycle and Property Owner booking-management lifecycle are both complete.
+
+The complete operational workflow is now:
+
+```text
+Customer selects available Bed
+        ↓
+Customer submits Booking
+        ↓
+Booking = pending
+Bed = reserved
+        ↓
+Owner reviews Booking
+        ↓
+     Decision
+    ↙        ↘
+Reject      Approve
+  ↓           ↓
+rejected    approved
+available   occupied
+              ↓
+        Current Tenant
+              ↓
+        Complete Stay
+              ↓
+          completed
+          available
+```
 
 ---
 
-# 52. Later Development Stages
+# 51. Current Development Stage — Property Owner Management
 
-After the Customer Experience:
+The Customer Experience and Owner booking-management experience are complete.
 
-## Owner Experience
+The current development stage exposes the existing Property-management backend through the Property Owner frontend.
 
-- Owner dashboard
+Planned flow:
+
+```text
+Owner Dashboard
+      ↓
+Properties
+      ↓
+Buildings
+      ↓
+Floors
+      ↓
+Rooms
+      ↓
+Beds
+```
+
+Day 7 focuses on:
+
+- Property listing and management
+- Property creation and editing
+- Property activation/deactivation
+- Building creation and management
+- Floor creation and management
+- Room creation and management
+- Room type
+- Room capacity
+- Monthly rent
+- Security deposit
+- Bed creation and management
+- Bed availability
+- Integration with existing ownership authorization
+
+---
+
+# 52. Remaining Development Stages
+
+## Property Owner Management
+
+Remaining:
+
 - Property-management UI
-- Building/Floor/Room/Bed UI
-- Booking approval/rejection UI
-- Tenant management
-- Revenue data
+- Building-management UI
+- Floor-management UI
+- Room-management UI
+- Bed-management UI
 - Property images
+
+The Owner dashboard, Booking-management workflow, approval/rejection/completion actions, Tenant view, and revenue summary are already implemented.
 
 ## Super Admin
 
-- Owner management
+Planned:
+
+- Owner management UI
 - User management
 - Property oversight
 - All Bookings
-- Platform revenue
+- Platform overview
 - Complaints
 - Platform settings
 
-## Remaining Product Features
+## Remaining Customer Features
 
+Planned:
+
+- Property search
+- Property filters
+- Customer profile
 - Reviews and ratings
-- Cloudinary image uploads
+
+## Additional Product Features
+
+Planned where time permits:
+
+- Cloudinary property-image uploads
 - Google Maps integration
+- Notifications
 
 ## Final Production Pass
 
-- Centralized errors
+Planned:
+
+- UI and responsive-design polish
+- Centralized error handling review
 - Validation audit
 - Rate limiting
 - Security audit
 - NoSQL-injection protection
-- Responsive design
-- Loading/error/empty states
-- End-to-end role testing
-- Final production verification
+- Loading/error/empty-state audit
+- Full Customer end-to-end testing
+- Full Property Owner end-to-end testing
+- Full Super Admin testing
+- Production verification
+- Final README update
+- Final architecture update
+- Demo preparation

@@ -151,20 +151,45 @@ Completed:
 - Protected customer routes
 - Frontend loading and error states
 
+## Day 6 — Property Owner Experience
+
+Completed:
+
+- Property Owner dashboard
+- Property count summary
+- Pending booking count
+- Approved booking count
+- Current tenant count
+- Active monthly-rent summary
+- Owner booking-management page
+- Booking status filtering
+- Booking approval UI
+- Booking rejection UI
+- Booking completion UI
+- Current-tenants page
+- Customer and accommodation details for Owner bookings
+- Owner notes
+- Booking and Bed state synchronization
+- Protected Owner frontend routes
+- Customer access protection for Owner pages
+- Customer check-in date selection
+- Frontend lint cleanup
+- Production Owner workflow verification
 
 ## Current Development Stage
 
-The customer booking workflow is complete.
+The customer booking workflow and Property Owner booking-management workflow are complete.
 
-The next development phase focuses on the Owner experience:
+The next development phase focuses on the Property Owner management interface:
 
-- Owner dashboard
-- View booking requests
-- Approve/reject bookings
-- Bed state synchronization
-- Tenant management UI
-- Property management UI improvements
-
+- Property management UI
+- Building management UI
+- Floor management UI
+- Room management UI
+- Bed management UI
+- Room pricing and security-deposit management
+- Room capacity management
+- Bed availability management
 
 ## Future Improvements
 
