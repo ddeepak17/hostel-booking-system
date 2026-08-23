@@ -19,6 +19,8 @@ import PropertyDetails from "./pages/customer/PropertyDetails";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerBookings from "./pages/owner/OwnerBookings";
 import OwnerTenants from "./pages/owner/OwnerTenants";
+import OwnerProperties from "./pages/owner/OwnerProperties";
+import OwnerPropertyManager from "./pages/owner/OwnerPropertyManager";
 
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -153,6 +155,34 @@ function App() {
             ]}
           >
             <OwnerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+
+      <Route
+        path="/owner/properties"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "owner",
+            ]}
+          >
+            <OwnerProperties />
+          </ProtectedRoute>
+        }
+      />
+
+
+      <Route
+        path="/owner/properties/:propertyId/manage"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "owner",
+            ]}
+          >
+            <OwnerPropertyManager />
           </ProtectedRoute>
         }
       />
