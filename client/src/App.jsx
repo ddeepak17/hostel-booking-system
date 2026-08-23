@@ -4,17 +4,14 @@ import {
   Routes,
 } from "react-router-dom";
 
-
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
-
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import CustomerProfile from "./pages/customer/CustomerProfile";
 import MyBookings from "./pages/customer/MyBookings";
-
 import PropertyList from "./pages/customer/PropertyList";
 import PropertyDetails from "./pages/customer/PropertyDetails";
-
 
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerBookings from "./pages/owner/OwnerBookings";
@@ -22,9 +19,11 @@ import OwnerTenants from "./pages/owner/OwnerTenants";
 import OwnerProperties from "./pages/owner/OwnerProperties";
 import OwnerPropertyManager from "./pages/owner/OwnerPropertyManager";
 
-
 import AdminDashboard from "./pages/admin/AdminDashboard";
-
+import AdminOwners from "./pages/admin/AdminOwners";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminProperties from "./pages/admin/AdminProperties";
+import AdminBookings from "./pages/admin/AdminBookings";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -35,7 +34,7 @@ function HomePage() {
 
       <div className="text-center">
 
-        <h1 className="text-4xl font-bold text-slate-900">
+        <h1 className="text-4xl font-bold">
           PG / Hostel Room Booking System
         </h1>
 
@@ -43,7 +42,16 @@ function HomePage() {
           Find and book accommodation.
         </p>
 
+
         <div className="mt-6 flex justify-center gap-3">
+
+          <Link
+            to="/properties"
+            className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white"
+          >
+            Browse Hostels
+          </Link>
+
 
           <Link
             to="/login"
@@ -52,9 +60,10 @@ function HomePage() {
             Login
           </Link>
 
+
           <Link
             to="/register"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900"
+            className="rounded-lg border bg-white px-5 py-3 font-semibold"
           >
             Register
           </Link>
@@ -72,15 +81,12 @@ function App() {
   return (
     <Routes>
 
-      {/* Public */}
-
       <Route
         path="/"
         element={
           <HomePage />
         }
       />
-
 
       <Route
         path="/login"
@@ -89,14 +95,12 @@ function App() {
         }
       />
 
-
       <Route
         path="/register"
         element={
           <RegisterPage />
         }
       />
-
 
       <Route
         path="/properties"
@@ -105,7 +109,6 @@ function App() {
         }
       />
 
-
       <Route
         path="/properties/:propertyId"
         element={
@@ -113,8 +116,6 @@ function App() {
         }
       />
 
-
-      {/* Customer */}
 
       <Route
         path="/customer/dashboard"
@@ -129,6 +130,18 @@ function App() {
         }
       />
 
+      <Route
+        path="/customer/profile"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "customer",
+            ]}
+          >
+            <CustomerProfile />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/customer/bookings"
@@ -144,8 +157,6 @@ function App() {
       />
 
 
-      {/* Owner */}
-
       <Route
         path="/owner/dashboard"
         element={
@@ -158,7 +169,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
 
       <Route
         path="/owner/properties"
@@ -173,7 +183,6 @@ function App() {
         }
       />
 
-
       <Route
         path="/owner/properties/:propertyId/manage"
         element={
@@ -187,7 +196,6 @@ function App() {
         }
       />
 
-
       <Route
         path="/owner/bookings"
         element={
@@ -200,7 +208,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
 
       <Route
         path="/owner/tenants"
@@ -216,8 +223,6 @@ function App() {
       />
 
 
-      {/* Super Admin */}
-
       <Route
         path="/admin/dashboard"
         element={
@@ -231,8 +236,58 @@ function App() {
         }
       />
 
+      <Route
+        path="/admin/owners"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "superAdmin",
+            ]}
+          >
+            <AdminOwners />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Fallback */}
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "superAdmin",
+            ]}
+          >
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/properties"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "superAdmin",
+            ]}
+          >
+            <AdminProperties />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/bookings"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "superAdmin",
+            ]}
+          >
+            <AdminBookings />
+          </ProtectedRoute>
+        }
+      />
+
 
       <Route
         path="*"

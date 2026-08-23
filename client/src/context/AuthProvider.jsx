@@ -6,77 +6,173 @@ import {
 import api from "../api/axios";
 import AuthContext from "./authContext";
 
-function AuthProvider({ children }) {
-  const [user, setUser] =
-    useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+function AuthProvider({
+  children,
+}) {
+  const [
+    user,
+    setUser,
+  ] =
+    useState(
+      null
+    );
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(
+      () =>
+        Boolean(
+          localStorage.getItem(
+            "token"
+          )
+        )
+    );
+
+
+  async function refreshUser() {
+    const response =
+      await api.get(
+        "/auth/me"
+      );
+
+    setUser(
+      response.data.user
+    );
+
+    return response.data.user;
+  }
+
 
   useEffect(() => {
-    async function restoreSession() {
-      const token =
-        localStorage.getItem("token");
+    let ignore =
+      false;
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
 
-      try {
-        const response =
-          await api.get("/auth/me");
+    const token =
+      localStorage.getItem(
+        "token"
+      );
 
-        setUser(response.data.user);
-      } catch {
-        localStorage.removeItem("token");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+
+    if (!token) {
+      return;
     }
 
-    restoreSession();
+
+    api.get(
+      "/auth/me"
+    )
+      .then(
+        (
+          response
+        ) => {
+          if (
+            !ignore
+          ) {
+            setUser(
+              response.data.user
+            );
+          }
+        }
+      )
+      .catch(
+        () => {
+          localStorage.removeItem(
+            "token"
+          );
+
+          if (
+            !ignore
+          ) {
+            setUser(
+              null
+            );
+          }
+        }
+      )
+      .finally(
+        () => {
+          if (
+            !ignore
+          ) {
+            setLoading(
+              false
+            );
+          }
+        }
+      );
+
+
+    return () => {
+      ignore =
+        true;
+    };
   }, []);
 
-  async function register(values) {
+
+  async function register(
+    values
+  ) {
     const response =
       await api.post(
         "/auth/register",
         values
       );
 
+
     localStorage.setItem(
       "token",
       response.data.token
     );
 
-    setUser(response.data.user);
+
+    setUser(
+      response.data.user
+    );
+
 
     return response.data.user;
   }
 
-  async function login(values) {
+
+  async function login(
+    values
+  ) {
     const response =
       await api.post(
         "/auth/login",
         values
       );
 
+
     localStorage.setItem(
       "token",
       response.data.token
     );
 
-    setUser(response.data.user);
+
+    setUser(
+      response.data.user
+    );
+
 
     return response.data.user;
   }
 
+
   function logout() {
-    localStorage.removeItem("token");
-    setUser(null);
+    localStorage.removeItem(
+      "token"
+    );
+
+    setUser(
+      null
+    );
   }
+
 
   return (
     <AuthContext.Provider
@@ -86,11 +182,13 @@ function AuthProvider({ children }) {
         register,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
+
 
 export default AuthProvider;
