@@ -10,39 +10,104 @@ import adminRoutes from "./routes/adminRoutes.js";
 import publicPropertyRoutes from "./routes/publicPropertyRoutes.js";
 import publicRoomRoutes from "./routes/publicRoomRoutes.js";
 import publicBedRoutes from "./routes/publicBedRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
-const app = express();
 
-// Global middleware
-app.use(helmet());
+const app =
+  express();
+
+
+app.use(
+  helmet()
+);
+
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin:
+      process.env.CLIENT_URL,
   })
 );
 
-app.use(express.json());
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+app.use(
+  express.json()
+);
+
+
+if (
+  process.env.NODE_ENV ===
+  "development"
+) {
+  app.use(
+    morgan(
+      "dev"
+    )
+  );
 }
 
-// Health check
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "API is running",
-  });
-});
 
-// API routes
-app.use("/api/auth", authRoutes);
-app.use("/api/customer", customerRoutes);
-app.use("/api/owner", ownerRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/properties", publicPropertyRoutes);
-app.use("/api/rooms", publicRoomRoutes);
-app.use("/api/beds", publicBedRoutes);
+app.get(
+  "/api/health",
+  (
+    req,
+    res
+  ) => {
+    res.status(200).json({
+      success: true,
+      message:
+        "API is running",
+    });
+  }
+);
+
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+
+app.use(
+  "/api/customer",
+  customerRoutes
+);
+
+
+app.use(
+  "/api/owner",
+  ownerRoutes
+);
+
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
+
+app.use(
+  "/api/properties",
+  publicPropertyRoutes
+);
+
+
+app.use(
+  "/api/rooms",
+  publicRoomRoutes
+);
+
+
+app.use(
+  "/api/beds",
+  publicBedRoutes
+);
+
+
+app.use(
+  "/api/reviews",
+  reviewRoutes
+);
+
 
 export default app;

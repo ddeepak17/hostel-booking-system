@@ -1,4 +1,6 @@
-import { Router } from "express";
+import {
+  Router,
+} from "express";
 
 import {
   protect,
@@ -10,27 +12,67 @@ import {
   getOwners,
 } from "../controllers/adminUserController.js";
 
-const router = Router();
+import {
+  getAdminOverview,
+  getAdminUsers,
+  updateAdminUserStatus,
+  getAdminProperties,
+  getAdminBookings,
+} from "../controllers/adminPlatformController.js";
+
+
+const router =
+  Router();
+
 
 router.use(
   protect,
-  authorize("superAdmin")
+  authorize(
+    "superAdmin"
+  )
 );
+
 
 router.get(
   "/dashboard",
-  (req, res) => {
-    res.status(200).json({
-      success: true,
-      message:
-        "Super Admin dashboard access",
-    });
-  }
+  getAdminOverview
 );
 
+
 router
-  .route("/owners")
-  .get(getOwners)
-  .post(createOwner);
+  .route(
+    "/owners"
+  )
+  .get(
+    getOwners
+  )
+  .post(
+    createOwner
+  );
+
+
+router.get(
+  "/users",
+  getAdminUsers
+);
+
+
+router.patch(
+  "/users/:userId/status",
+  updateAdminUserStatus
+);
+
+
+router.get(
+  "/properties",
+  getAdminProperties
+);
+
+
+router.get(
+  "/bookings",
+  getAdminBookings
+);
+
 
 export default router;

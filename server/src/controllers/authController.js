@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
+
 function formatUser(user) {
   return {
     id: user._id,
@@ -9,11 +10,16 @@ function formatUser(user) {
     phone: user.phone,
     role: user.role,
     avatar: user.avatar,
-    isActive: user.isActive,
+    isActive:
+      user.isActive,
   };
 }
 
-export async function register(req, res) {
+
+export async function register(
+  req,
+  res
+) {
   try {
     const {
       name,
@@ -22,7 +28,12 @@ export async function register(req, res) {
       phone,
     } = req.body;
 
-    if (!name || !email || !password) {
+
+    if (
+      !name ||
+      !email ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -30,9 +41,15 @@ export async function register(req, res) {
       });
     }
 
-    const existingUser = await User.findOne({
-      email: email.toLowerCase().trim(),
-    });
+
+    const existingUser =
+      await User.findOne({
+        email:
+          email
+            .toLowerCase()
+            .trim(),
+      });
+
 
     if (existingUser) {
       return res.status(409).json({
@@ -42,34 +59,57 @@ export async function register(req, res) {
       });
     }
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      phone,
-    });
 
-    const token = generateToken(user._id);
+    const user =
+      await User.create({
+        name,
+        email,
+        password,
+        phone,
+      });
+
+
+    const token =
+      generateToken(
+        user._id
+      );
+
 
     return res.status(201).json({
       success: true,
-      message: "Account created successfully",
+      message:
+        "Account created successfully",
       token,
-      user: formatUser(user),
+      user:
+        formatUser(
+          user
+        ),
     });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const messages = Object.values(
-        error.errors
-      ).map((item) => item.message);
+    if (
+      error.name ===
+      "ValidationError"
+    ) {
+      const messages =
+        Object.values(
+          error.errors
+        ).map(
+          (item) =>
+            item.message
+        );
+
 
       return res.status(400).json({
         success: false,
-        message: messages[0],
+        message:
+          messages[0],
       });
     }
 
-    if (error.code === 11000) {
+
+    if (
+      error.code === 11000
+    ) {
       return res.status(409).json({
         success: false,
         message:
@@ -77,20 +117,37 @@ export async function register(req, res) {
       });
     }
 
-    console.error("Register error:", error);
+
+    console.error(
+      "Register error:",
+      error
+    );
+
 
     return res.status(500).json({
       success: false,
-      message: "Unable to create account",
+      message:
+        "Unable to create account",
     });
   }
 }
 
-export async function login(req, res) {
-  try {
-    const { email, password } = req.body;
 
-    if (!email || !password) {
+export async function login(
+  req,
+  res
+) {
+  try {
+    const {
+      email,
+      password,
+    } = req.body;
+
+
+    if (
+      !email ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -98,26 +155,42 @@ export async function login(req, res) {
       });
     }
 
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-    }).select("+password");
+
+    const user =
+      await User.findOne({
+        email:
+          email
+            .toLowerCase()
+            .trim(),
+      })
+        .select(
+          "+password"
+        );
+
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message:
+          "Invalid email or password",
       });
     }
 
+
     const passwordMatches =
-      await user.comparePassword(password);
+      await user.comparePassword(
+        password
+      );
+
 
     if (!passwordMatches) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message:
+          "Invalid email or password",
       });
     }
+
 
     if (!user.isActive) {
       return res.status(403).json({
@@ -127,27 +200,126 @@ export async function login(req, res) {
       });
     }
 
-    const token = generateToken(user._id);
+
+    const token =
+      generateToken(
+        user._id
+      );
+
 
     return res.status(200).json({
       success: true,
-      message: "Login successful",
+      message:
+        "Login successful",
       token,
-      user: formatUser(user),
+      user:
+        formatUser(
+          user
+        ),
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error(
+      "Login error:",
+      error
+    );
+
 
     return res.status(500).json({
       success: false,
-      message: "Unable to log in",
+      message:
+        "Unable to log in",
     });
   }
 }
 
-export async function getMe(req, res) {
+
+export async function getMe(
+  req,
+  res
+) {
   return res.status(200).json({
     success: true,
-    user: formatUser(req.user),
+    user:
+      formatUser(
+        req.user
+      ),
   });
+}
+
+
+export async function updateMe(
+  req,
+  res
+) {
+  try {
+    const allowedFields =
+      [
+        "name",
+        "phone",
+        "avatar",
+      ];
+
+
+    for (
+      const field
+      of allowedFields
+    ) {
+      if (
+        Object.hasOwn(
+          req.body,
+          field
+        )
+      ) {
+        req.user[field] =
+          req.body[field];
+      }
+    }
+
+
+    await req.user.save();
+
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Profile updated",
+      user:
+        formatUser(
+          req.user
+        ),
+    });
+  } catch (error) {
+    if (
+      error.name ===
+      "ValidationError"
+    ) {
+      const messages =
+        Object.values(
+          error.errors
+        ).map(
+          (item) =>
+            item.message
+        );
+
+
+      return res.status(400).json({
+        success: false,
+        message:
+          messages[0],
+      });
+    }
+
+
+    console.error(
+      "Update profile error:",
+      error
+    );
+
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Unable to update profile",
+    });
+  }
 }
