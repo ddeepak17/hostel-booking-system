@@ -33,46 +33,159 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 function HomePage() {
   return (
-    <main className="min-h-[calc(100vh-65px)] bg-slate-950 px-4 py-16 text-white">
+    <main className="min-h-[calc(100vh-65px)] overflow-hidden bg-slate-950 text-white">
 
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-center py-16 text-center sm:py-28">
+      <section className="relative px-4 py-16 sm:px-6 sm:py-24">
 
-        <p className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200">
-          Student accommodation made simpler
-        </p>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.28),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.16),transparent_32%)]" />
 
 
-        <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
-          Find the right hostel.
-          Book the right bed.
-        </h1>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
+
+          <div>
+
+            <p className="inline-flex rounded-full border border-blue-400/30 bg-blue-400/10 px-4 py-2 text-sm font-semibold text-blue-100">
+              Student accommodation, all in one place
+            </p>
 
 
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-          Discover properties, compare rooms and pricing, reserve available beds, and manage your stay from one platform.
-        </p>
+            <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-tight sm:text-6xl">
+              Find a room that feels right. Reserve it with confidence.
+            </h1>
 
 
-        <div className="mt-9 flex flex-wrap justify-center gap-3">
-
-          <Link
-            to="/properties"
-            className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg"
-          >
-            Browse Hostels
-          </Link>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+              Explore verified property details, compare room pricing and availability, and keep every booking update in one clear dashboard.
+            </p>
 
 
-          <Link
-            to="/register"
-            className="rounded-xl bg-white px-6 py-3 font-bold text-slate-900"
-          >
-            Create Account
-          </Link>
+            <div className="mt-9 flex flex-wrap gap-3">
+
+              <Link
+                to="/properties"
+                className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-950/40 hover:bg-blue-500"
+              >
+                Browse Hostels
+              </Link>
+
+
+              <Link
+                to="/register"
+                className="rounded-xl border border-white/15 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-100"
+              >
+                Create Account
+              </Link>
+
+            </div>
+
+
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
+              <span>Room-level pricing</span>
+              <span>Live bed availability</span>
+              <span>Booking status tracking</span>
+            </div>
+
+          </div>
+
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-blue-950/30 backdrop-blur sm:p-7">
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-blue-200">
+                  A simpler booking journey
+                </p>
+                <h2 className="mt-1 text-2xl font-black">
+                  From search to move-in
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-200">
+                Live availability
+              </span>
+            </div>
+
+
+            <ol className="mt-7 space-y-4">
+              {[
+                [
+                  "01",
+                  "Discover",
+                  "Filter hostels by location, price, amenities, and room type.",
+                ],
+                [
+                  "02",
+                  "Compare",
+                  "Review photos, rooms, deposits, available beds, and resident feedback.",
+                ],
+                [
+                  "03",
+                  "Request",
+                  "Choose a check-in date and follow the booking through approval.",
+                ],
+              ].map(([
+                number,
+                title,
+                description,
+              ]) => (
+                <li
+                  key={number}
+                  className="flex gap-4 rounded-2xl border border-white/10 bg-slate-900/70 p-4"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-sm font-black">
+                    {number}
+                  </span>
+                  <div>
+                    <h3 className="font-bold">
+                      {title}
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      {description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+          </div>
 
         </div>
 
-      </div>
+      </section>
+
+
+      <section className="border-t border-white/10 bg-slate-900/55 px-4 py-10 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          {[
+            [
+              "Students",
+              "Search properties, request a bed, manage bookings, and review completed stays.",
+            ],
+            [
+              "Property owners",
+              "Manage inventory, availability, booking decisions, tenants, media, and location details.",
+            ],
+            [
+              "Platform admins",
+              "Oversee users, owners, properties, bookings, and high-level platform activity.",
+            ],
+          ].map(([
+            title,
+            description,
+          ]) => (
+            <article
+              key={title}
+              className="rounded-2xl border border-white/10 p-5"
+            >
+              <h2 className="font-bold text-white">
+                {title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                {description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
 
     </main>
   );

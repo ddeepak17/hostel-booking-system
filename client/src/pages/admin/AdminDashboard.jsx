@@ -17,7 +17,6 @@ import {
 export default function AdminDashboard() {
   const {
     user,
-    logout,
   } =
     useAuth();
 
@@ -104,7 +103,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
         Loading admin dashboard...
       </main>
     );
@@ -112,13 +111,11 @@ export default function AdminDashboard() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <div className="flex items-center justify-between gap-4">
-
-          <div>
+        <div>
 
             <h1 className="text-3xl font-bold">
               Super Admin Dashboard
@@ -127,18 +124,6 @@ export default function AdminDashboard() {
             <p className="mt-2 text-slate-600">
               Welcome, {user?.name}
             </p>
-
-          </div>
-
-
-          <button
-            onClick={
-              logout
-            }
-            className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white"
-          >
-            Logout
-          </button>
 
         </div>
 

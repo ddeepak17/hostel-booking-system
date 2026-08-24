@@ -38,11 +38,15 @@ function RegisterPage() {
   const navigate = useNavigate();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
+    <main className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-slate-100 px-4 py-10">
+      <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-sm sm:p-8">
         <h1 className="text-2xl font-bold">
           Create account
         </h1>
+
+        <p className="mt-2 text-sm text-slate-600">
+          Create a student account to request beds and track bookings.
+        </p>
 
         <Formik
           initialValues={{
@@ -84,9 +88,13 @@ function RegisterPage() {
           }) => (
             <Form className="mt-6 space-y-4">
               <div>
-                <label>Name</label>
+                <label htmlFor="name">
+                  Name
+                </label>
                 <Field
+                  id="name"
                   name="name"
+                  autoComplete="name"
                   className="mt-1 w-full rounded-lg border p-3"
                 />
                 <ErrorMessage
@@ -97,10 +105,14 @@ function RegisterPage() {
               </div>
 
               <div>
-                <label>Email</label>
+                <label htmlFor="email">
+                  Email
+                </label>
                 <Field
+                  id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   className="mt-1 w-full rounded-lg border p-3"
                 />
                 <ErrorMessage
@@ -111,10 +123,14 @@ function RegisterPage() {
               </div>
 
               <div>
-                <label>Password</label>
+                <label htmlFor="password">
+                  Password
+                </label>
                 <Field
+                  id="password"
                   name="password"
                   type="password"
+                  autoComplete="new-password"
                   className="mt-1 w-full rounded-lg border p-3"
                 />
                 <ErrorMessage
@@ -125,9 +141,14 @@ function RegisterPage() {
               </div>
 
               <div>
-                <label>Phone</label>
+                <label htmlFor="phone">
+                  Phone <span className="text-slate-400">(optional)</span>
+                </label>
                 <Field
+                  id="phone"
                   name="phone"
+                  type="tel"
+                  autoComplete="tel"
                   className="mt-1 w-full rounded-lg border p-3"
                 />
               </div>
@@ -141,7 +162,7 @@ function RegisterPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full rounded-lg bg-slate-900 p-3 font-semibold text-white"
+                className="w-full rounded-lg bg-slate-900 p-3 font-semibold text-white disabled:opacity-60"
               >
                 {isSubmitting
                   ? "Creating..."

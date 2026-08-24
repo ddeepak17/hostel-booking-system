@@ -28,14 +28,14 @@ function LoginPage() {
   const navigate = useNavigate();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
+    <main className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-slate-100 px-4 py-10">
+      <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-sm sm:p-8">
         <h1 className="text-2xl font-bold text-slate-900">
-          Login
+          Welcome back
         </h1>
 
         <p className="mt-2 text-sm text-slate-600">
-          Sign in to your account.
+          Sign in to manage your HostelHub account.
         </p>
 
         <Formik
@@ -100,6 +100,7 @@ function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   className="mt-1 w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-slate-500"
                 />
 
@@ -122,6 +123,7 @@ function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   className="mt-1 w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-slate-500"
                 />
 

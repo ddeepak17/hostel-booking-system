@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
+import SafeImage from "../../components/SafeImage";
 
 import {
   getProperty,
@@ -21,6 +22,17 @@ import {
   getPropertyReviews,
   savePropertyReview,
 } from "../../api/reviewApi";
+
+
+const now = new Date();
+const TODAY_INPUT_VALUE =
+  new Date(
+    now.getTime() -
+      now.getTimezoneOffset() *
+        60_000
+  )
+    .toISOString()
+    .slice(0, 10);
 
 
 export default function PropertyDetails() {
@@ -114,6 +126,14 @@ export default function PropertyDetails() {
   ] =
     useState(
       ""
+    );
+
+  const [
+    feedback,
+    setFeedback,
+  ] =
+    useState(
+      null
     );
 
 
@@ -240,6 +260,10 @@ export default function PropertyDetails() {
     roomId
   ) {
     try {
+      setFeedback(
+        null
+      );
+
       const data =
         await getRoomBeds(
           roomId
@@ -261,12 +285,14 @@ export default function PropertyDetails() {
         })
       );
     } catch (error) {
-      alert(
-        error.response
-          ?.data
-          ?.message ||
-        "Unable to load beds"
-      );
+      setFeedback({
+        type: "error",
+        message:
+          error.response
+            ?.data
+            ?.message ||
+          "Unable to load beds",
+      });
     }
   }
 
@@ -276,9 +302,12 @@ export default function PropertyDetails() {
     roomId
   ) {
     if (!user) {
-      alert(
-        "Please log in as a customer to book."
-      );
+      setFeedback({
+        type: "info",
+        message:
+          "Sign in with a customer account to request this bed.",
+        loginRequired: true,
+      });
 
       return;
     }
@@ -288,9 +317,11 @@ export default function PropertyDetails() {
       user.role !==
       "customer"
     ) {
-      alert(
-        "Only customers can create bookings."
-      );
+      setFeedback({
+        type: "error",
+        message:
+          "Only customer accounts can create bookings.",
+      });
 
       return;
     }
@@ -299,9 +330,11 @@ export default function PropertyDetails() {
     if (
       !checkInDate
     ) {
-      alert(
-        "Please select a check-in date."
-      );
+      setFeedback({
+        type: "error",
+        message:
+          "Select a check-in date before requesting a bed.",
+      });
 
       return;
     }
@@ -315,22 +348,26 @@ export default function PropertyDetails() {
         });
 
 
-      alert(
-        data.message ||
-        "Booking request submitted"
-      );
+      setFeedback({
+        type: "success",
+        message:
+          data.message ||
+          "Booking request submitted",
+      });
 
 
       await showBeds(
         roomId
       );
     } catch (error) {
-      alert(
-        error.response
-          ?.data
-          ?.message ||
-        "Unable to create booking"
-      );
+      setFeedback({
+        type: "error",
+        message:
+          error.response
+            ?.data
+            ?.message ||
+          "Unable to create booking",
+      });
     }
   }
 
@@ -356,10 +393,12 @@ export default function PropertyDetails() {
         );
 
 
-      alert(
-        data.message ||
-        "Review saved"
-      );
+      setFeedback({
+        type: "success",
+        message:
+          data.message ||
+          "Review saved",
+      });
 
 
       setComment(
@@ -369,19 +408,21 @@ export default function PropertyDetails() {
 
       await refreshReviews();
     } catch (error) {
-      alert(
-        error.response
-          ?.data
-          ?.message ||
-        "Unable to save review"
-      );
+      setFeedback({
+        type: "error",
+        message:
+          error.response
+            ?.data
+            ?.message ||
+          "Unable to save review",
+      });
     }
   }
 
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
         Loading property...
       </main>
     );
@@ -393,7 +434,7 @@ export default function PropertyDetails() {
     !property
   ) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8 text-red-600">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 text-red-600 sm:px-6">
         {
           error ||
           "Property not found"
@@ -466,7 +507,7 @@ export default function PropertyDetails() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 sm:p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
@@ -479,12 +520,84 @@ export default function PropertyDetails() {
 
 
         {
-          images.length >
-          0 ? (
+          feedback && (
+            <div
+              role={
+                feedback.type ===
+                "error"
+                  ? "alert"
+                  : "status"
+              }
+              className={[
+                "mt-4 flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between",
+                feedback.type ===
+                "error"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : feedback.type ===
+                    "success"
+                    ? "border-green-200 bg-green-50 text-green-800"
+                    : "border-blue-200 bg-blue-50 text-blue-800",
+              ].join(
+                " "
+              )}
+            >
+              <span>
+                {
+                  feedback.message
+                }
+              </span>
+
+              <div className="flex items-center gap-3">
+                {
+                  feedback.loginRequired && (
+                    <Link
+                      to="/login"
+                      className="font-bold underline underline-offset-2"
+                    >
+                      Sign in
+                    </Link>
+                  )
+                }
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFeedback(
+                      null
+                    )
+                  }
+                  className="text-sm font-semibold opacity-70 hover:opacity-100"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )
+        }
+
+
+        {
+          images.length ===
+          1 ? (
+
+            <SafeImage
+              src={
+                images[0].url
+              }
+              alt={
+                images[0].alt ||
+                property.name
+              }
+              className="mt-4 h-72 w-full rounded-2xl object-cover sm:h-96"
+              loading="eager"
+            />
+
+          ) : images.length >
+            1 ? (
 
             <section className="mt-4 grid gap-3 md:grid-cols-2">
 
-              <img
+              <SafeImage
                 src={
                   images[0].url
                 }
@@ -493,6 +606,7 @@ export default function PropertyDetails() {
                   property.name
                 }
                 className="h-72 w-full rounded-2xl object-cover md:h-full"
+                loading="eager"
               />
 
 
@@ -510,7 +624,7 @@ export default function PropertyDetails() {
                         index
                       ) => (
 
-                        <img
+                        <SafeImage
                           key={`${image.url}-${index}`}
                           src={
                             image.url
@@ -526,18 +640,6 @@ export default function PropertyDetails() {
                     )
                 }
 
-
-                {
-                  images.length ===
-                  1 && (
-
-                    <div className="col-span-2 flex min-h-48 items-center justify-center rounded-xl bg-slate-200 text-slate-500">
-                      More photos coming soon
-                    </div>
-
-                  )
-                }
-
               </div>
 
             </section>
@@ -545,7 +647,7 @@ export default function PropertyDetails() {
           ) : (
 
             <div className="mt-4 flex h-64 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 text-slate-500">
-              Property photos coming soon
+              No property photos available
             </div>
 
           )
@@ -564,11 +666,15 @@ export default function PropertyDetails() {
                 }
               </h1>
 
-              <p className="mt-3 max-w-3xl text-slate-600">
-                {
-                  property.description
-                }
-              </p>
+              {
+                property.description && (
+                  <p className="mt-3 max-w-3xl text-slate-600">
+                    {
+                      property.description
+                    }
+                  </p>
+                )
+              }
 
 
               {
@@ -673,6 +779,9 @@ export default function PropertyDetails() {
 
               <input
                 type="date"
+                min={
+                  TODAY_INPUT_VALUE
+                }
                 value={
                   checkInDate
                 }

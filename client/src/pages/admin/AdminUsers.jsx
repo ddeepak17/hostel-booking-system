@@ -4,10 +4,6 @@ import {
 } from "react";
 
 import {
-  Link,
-} from "react-router-dom";
-
-import {
   getAdminUsers,
   setAdminUserStatus,
 } from "../../api/adminApi";
@@ -173,19 +169,11 @@ export default function AdminUsers() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <Link
-          to="/admin/dashboard"
-          className="font-semibold text-blue-600"
-        >
-          ← Dashboard
-        </Link>
-
-
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
 
           <h1 className="text-3xl font-bold">
             Users
@@ -193,6 +181,7 @@ export default function AdminUsers() {
 
 
           <select
+            aria-label="Filter users by role"
             value={
               role
             }

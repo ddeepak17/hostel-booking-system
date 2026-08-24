@@ -12,8 +12,8 @@ function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        Loading...
+      <div className="flex min-h-[calc(100vh-65px)] items-center justify-center bg-slate-100 text-slate-600">
+        Loading your account...
       </div>
     );
   }

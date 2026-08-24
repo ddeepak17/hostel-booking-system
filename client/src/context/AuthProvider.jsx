@@ -113,6 +113,26 @@ function AuthProvider({
   }, []);
 
 
+  useEffect(() => {
+    function handleExpiredSession() {
+      setUser(null);
+      setLoading(false);
+    }
+
+    window.addEventListener(
+      "hostelhub:auth-expired",
+      handleExpiredSession
+    );
+
+    return () => {
+      window.removeEventListener(
+        "hostelhub:auth-expired",
+        handleExpiredSession
+      );
+    };
+  }, []);
+
+
   async function register(
     values
   ) {

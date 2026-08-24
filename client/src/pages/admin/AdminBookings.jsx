@@ -4,12 +4,11 @@ import {
 } from "react";
 
 import {
-  Link,
-} from "react-router-dom";
-
-import {
   getAdminBookings,
 } from "../../api/adminApi";
+import {
+  getBookingStatusClasses,
+} from "../../utils/statusStyles";
 
 
 const STATUSES = [
@@ -135,19 +134,11 @@ export default function AdminBookings() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <Link
-          to="/admin/dashboard"
-          className="font-semibold text-blue-600"
-        >
-          ← Dashboard
-        </Link>
-
-
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
 
           <h1 className="text-3xl font-bold">
             Platform Bookings
@@ -155,6 +146,7 @@ export default function AdminBookings() {
 
 
           <select
+            aria-label="Filter bookings by status"
             value={
               status
             }
@@ -277,7 +269,11 @@ export default function AdminBookings() {
                         </div>
 
 
-                        <span className="h-fit rounded-full bg-slate-100 px-3 py-1 font-semibold capitalize">
+                        <span
+                          className={`h-fit rounded-full px-3 py-1 font-semibold capitalize ${getBookingStatusClasses(
+                            booking.status
+                          )}`}
+                        >
                           {
                             booking.status
                           }

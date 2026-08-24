@@ -7,6 +7,9 @@ import {
   getMyBookings,
   cancelBooking,
 } from "../../api/bookingApi";
+import {
+  getBookingStatusClasses,
+} from "../../utils/statusStyles";
 
 
 export default function MyBookings() {
@@ -94,7 +97,7 @@ export default function MyBookings() {
 
       setError("");
     } catch (error) {
-      alert(
+      setError(
         error.response?.data?.message ||
           "Unable to cancel booking"
       );
@@ -104,7 +107,7 @@ export default function MyBookings() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
         <div className="mx-auto max-w-5xl">
 
@@ -124,7 +127,7 @@ export default function MyBookings() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-5xl">
 
@@ -189,7 +192,11 @@ export default function MyBookings() {
                         </div>
 
 
-                        <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold capitalize text-slate-700">
+                        <span
+                          className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${getBookingStatusClasses(
+                            booking.status
+                          )}`}
+                        >
                           {booking.status}
                         </span>
 

@@ -512,7 +512,7 @@ export default function OwnerPropertyMedia() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
         Loading property media...
       </main>
     );
@@ -521,7 +521,7 @@ export default function OwnerPropertyMedia() {
 
   if (!property) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
         Property not found.
       </main>
     );
@@ -561,7 +561,7 @@ export default function OwnerPropertyMedia() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 sm:p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
@@ -636,6 +636,7 @@ export default function OwnerPropertyMedia() {
                   event.target.value
                 )
               }
+              aria-label="Property image URL"
               placeholder="https://example.com/property.jpg"
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
@@ -652,6 +653,7 @@ export default function OwnerPropertyMedia() {
                   event.target.value
                 )
               }
+              aria-label="Image description"
               placeholder="Image description"
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
@@ -812,6 +814,7 @@ export default function OwnerPropertyMedia() {
                     event.target.value
                   )
                 }
+                aria-label="Longitude"
                 placeholder="-63.5752"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
               />
@@ -838,6 +841,7 @@ export default function OwnerPropertyMedia() {
                     event.target.value
                   )
                 }
+                aria-label="Latitude"
                 placeholder="44.6488"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
               />

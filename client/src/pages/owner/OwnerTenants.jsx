@@ -4,10 +4,6 @@ import {
 } from "react";
 
 import {
-  Link,
-} from "react-router-dom";
-
-import {
   getOwnerTenants,
 } from "../../api/ownerApi";
 
@@ -72,11 +68,11 @@ export default function OwnerTenants() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
 
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
@@ -87,15 +83,6 @@ export default function OwnerTenants() {
               Active approved bookings for your properties.
             </p>
           </div>
-
-
-          <Link
-            to="/owner/dashboard"
-            className="font-semibold text-blue-600"
-          >
-            ← Dashboard
-          </Link>
-
         </div>
 
 

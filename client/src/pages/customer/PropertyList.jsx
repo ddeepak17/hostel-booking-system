@@ -10,6 +10,7 @@ import {
 import {
   getProperties,
 } from "../../api/propertyApi";
+import SafeImage from "../../components/SafeImage";
 
 
 const EMPTY_FILTERS = {
@@ -212,13 +213,17 @@ export default function PropertyList() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
         <h1 className="text-3xl font-bold">
           Available Hostels
         </h1>
+
+        <p className="mt-2 text-slate-600">
+          Compare locations, amenities, room types, and live bed availability.
+        </p>
 
 
         <form
@@ -232,12 +237,14 @@ export default function PropertyList() {
 
             <input
               name="q"
+              aria-label="Search by name or location"
               value={
                 filters.q
               }
               onChange={
                 handleChange
               }
+              aria-label="Search by property name or location"
               placeholder="Search name or location"
               className="rounded border px-3 py-2"
             />
@@ -245,12 +252,14 @@ export default function PropertyList() {
 
             <input
               name="city"
+              aria-label="Filter by city"
               value={
                 filters.city
               }
               onChange={
                 handleChange
               }
+              aria-label="Filter by city"
               placeholder="City"
               className="rounded border px-3 py-2"
             />
@@ -258,19 +267,23 @@ export default function PropertyList() {
 
             <input
               name="amenity"
+              aria-label="Filter by amenity"
               value={
                 filters.amenity
               }
               onChange={
                 handleChange
               }
+              aria-label="Filter by amenity"
               placeholder="Amenity, e.g. WiFi"
               className="rounded border px-3 py-2"
             />
 
 
             <select
+              aria-label="Filter by room type"
               name="roomType"
+              aria-label="Filter by room type"
               value={
                 filters.roomType
               }
@@ -311,12 +324,14 @@ export default function PropertyList() {
               type="number"
               min="0"
               name="minPrice"
+              aria-label="Minimum monthly rent"
               value={
                 filters.minPrice
               }
               onChange={
                 handleChange
               }
+              aria-label="Minimum monthly rent"
               placeholder="Minimum monthly rent"
               className="rounded border px-3 py-2"
             />
@@ -326,12 +341,14 @@ export default function PropertyList() {
               type="number"
               min="0"
               name="maxPrice"
+              aria-label="Maximum monthly rent"
               value={
                 filters.maxPrice
               }
               onChange={
                 handleChange
               }
+              aria-label="Maximum monthly rent"
               placeholder="Maximum monthly rent"
               className="rounded border px-3 py-2"
             />
@@ -384,7 +401,10 @@ export default function PropertyList() {
 
         {
           error && (
-            <p className="mt-5 text-red-600">
+            <p
+              role="alert"
+              className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700"
+            >
               {error}
             </p>
           )
@@ -420,8 +440,27 @@ export default function PropertyList() {
                         property._id
                       }
                       to={`/properties/${property._id}`}
-                      className="rounded-xl bg-white p-6 shadow-sm hover:shadow-md"
+                      className="group overflow-hidden rounded-2xl bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-lg"
                     >
+
+                      <SafeImage
+                        src={
+                          property.images
+                            ?.[0]
+                            ?.url
+                        }
+                        alt={
+                          property.images
+                            ?.[0]
+                            ?.alt ||
+                          `${property.name} property`
+                        }
+                        className="h-52 w-full object-cover"
+                        fallbackLabel="Photo not available"
+                      />
+
+
+                      <div className="p-6">
 
                       <h2 className="text-xl font-bold">
                         {
@@ -429,11 +468,15 @@ export default function PropertyList() {
                         }
                       </h2>
 
-                      <p className="mt-2 text-slate-600">
-                        {
-                          property.description
-                        }
-                      </p>
+                      {
+                        property.description && (
+                          <p className="mt-2 line-clamp-2 text-slate-600">
+                            {
+                              property.description
+                            }
+                          </p>
+                        )
+                      }
 
                       <p className="mt-3 text-sm text-slate-500">
                         {
@@ -480,6 +523,13 @@ export default function PropertyList() {
                               )
                             )
                         }
+
+                      </div>
+
+
+                      <p className="mt-5 font-semibold text-blue-600">
+                        View rooms and availability →
+                      </p>
 
                       </div>
 

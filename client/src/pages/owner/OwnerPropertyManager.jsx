@@ -155,6 +155,11 @@ export default function OwnerPropertyManager() {
   ] = useState("");
 
   const [
+    success,
+    setSuccess,
+  ] = useState("");
+
+  const [
     actionLoading,
     setActionLoading,
   ] = useState(false);
@@ -393,6 +398,7 @@ export default function OwnerPropertyManager() {
     try {
       setActionLoading(true);
       setError("");
+      setSuccess("");
 
       await updateOwnerProperty(
         propertyId,
@@ -439,7 +445,7 @@ export default function OwnerPropertyManager() {
 
       await refreshProperty();
 
-      alert(
+      setSuccess(
         "Property updated."
       );
     } catch (error) {
@@ -470,6 +476,7 @@ export default function OwnerPropertyManager() {
     try {
       setActionLoading(true);
       setError("");
+      setSuccess("");
 
       await deactivateOwnerProperty(
         propertyId
@@ -477,7 +484,7 @@ export default function OwnerPropertyManager() {
 
       await refreshProperty();
 
-      alert(
+      setSuccess(
         "Property deactivated."
       );
     } catch (error) {
@@ -1420,7 +1427,7 @@ export default function OwnerPropertyManager() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
         <div className="mx-auto max-w-7xl">
           Loading property management...
@@ -1433,7 +1440,7 @@ export default function OwnerPropertyManager() {
 
   if (!property) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
+      <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
         <div className="mx-auto max-w-7xl">
           Property not found.
@@ -1445,7 +1452,7 @@ export default function OwnerPropertyManager() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-7xl">
 
@@ -1505,6 +1512,32 @@ export default function OwnerPropertyManager() {
 
               </div>
 
+            </div>
+          )
+        }
+
+
+        {
+          success && (
+            <div
+              role="status"
+              className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <span>
+                  {success}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSuccess("")
+                  }
+                  className="font-bold"
+                  aria-label="Dismiss message"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           )
         }
@@ -1804,6 +1837,7 @@ export default function OwnerPropertyManager() {
                   })
                 )
               }
+              aria-label="Building name"
               placeholder="Building name"
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
@@ -1824,6 +1858,7 @@ export default function OwnerPropertyManager() {
                   })
                 )
               }
+              aria-label="Building code"
               placeholder="Code, e.g. A"
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
@@ -1973,6 +2008,7 @@ export default function OwnerPropertyManager() {
                                     event.target.value
                                   )
                                 }
+                                aria-label={`Floor number for ${building.name}`}
                                 placeholder="Floor number"
                                 className="rounded-lg border border-slate-300 px-3 py-2"
                               />
@@ -1991,6 +2027,7 @@ export default function OwnerPropertyManager() {
                                     event.target.value
                                   )
                                 }
+                                aria-label={`Floor name for ${building.name}`}
                                 placeholder="Floor name"
                                 className="rounded-lg border border-slate-300 px-3 py-2"
                               />
@@ -2142,6 +2179,7 @@ export default function OwnerPropertyManager() {
                                                       event.target.value
                                                     )
                                                   }
+                                                  aria-label={`Room number for floor ${floor.floorNumber}`}
                                                   placeholder="Room number"
                                                   className="rounded border px-3 py-2"
                                                 />
@@ -2199,6 +2237,7 @@ export default function OwnerPropertyManager() {
                                                       event.target.value
                                                     )
                                                   }
+                                                  aria-label="Room capacity"
                                                   placeholder="Capacity"
                                                   className="rounded border px-3 py-2"
                                                 />
@@ -2219,6 +2258,7 @@ export default function OwnerPropertyManager() {
                                                       event.target.value
                                                     )
                                                   }
+                                                  aria-label="Monthly rent"
                                                   placeholder="Monthly rent"
                                                   className="rounded border px-3 py-2"
                                                 />
@@ -2239,6 +2279,7 @@ export default function OwnerPropertyManager() {
                                                       event.target.value
                                                     )
                                                   }
+                                                  aria-label="Security deposit"
                                                   placeholder="Security deposit"
                                                   className="rounded border px-3 py-2"
                                                 />
@@ -2257,6 +2298,7 @@ export default function OwnerPropertyManager() {
                                                       event.target.value
                                                     )
                                                   }
+                                                  aria-label="Room amenities"
                                                   placeholder="Amenities"
                                                   className="rounded border px-3 py-2"
                                                 />
@@ -2423,6 +2465,7 @@ export default function OwnerPropertyManager() {
                                                                         event.target.value
                                                                       )
                                                                     }
+                                                                    aria-label={`New bed number for room ${room.roomNumber}`}
                                                                     placeholder="Bed number"
                                                                     className="rounded border px-3 py-2"
                                                                   />

@@ -288,7 +288,7 @@ export default function OwnerProperties() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 sm:p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-7xl">
 

@@ -8,21 +8,18 @@ import useAuth from "../../hooks/useAuth";
 export default function CustomerDashboard() {
   const {
     user,
-    logout,
   } =
     useAuth();
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-5xl">
 
         <div className="rounded-xl bg-white p-6 shadow-sm">
 
-          <div className="flex items-center justify-between gap-4">
-
-            <div>
+          <div>
 
               <h1 className="text-3xl font-bold">
                 Customer Dashboard
@@ -36,18 +33,6 @@ export default function CustomerDashboard() {
               <p className="mt-1 text-slate-500">
                 {user?.email}
               </p>
-
-            </div>
-
-
-            <button
-              onClick={
-                logout
-              }
-              className="rounded bg-slate-900 px-4 py-2 font-semibold text-white"
-            >
-              Logout
-            </button>
 
           </div>
 

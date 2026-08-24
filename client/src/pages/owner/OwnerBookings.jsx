@@ -4,15 +4,14 @@ import {
 } from "react";
 
 import {
-  Link,
-} from "react-router-dom";
-
-import {
   approveOwnerBooking,
   completeOwnerBooking,
   getOwnerBookings,
   rejectOwnerBooking,
 } from "../../api/ownerApi";
+import {
+  getBookingStatusClasses,
+} from "../../utils/statusStyles";
 
 
 const FILTERS = [
@@ -23,31 +22,6 @@ const FILTERS = [
   "cancelled",
   "completed",
 ];
-
-
-function statusClasses(
-  status
-) {
-  switch (status) {
-    case "pending":
-      return "bg-amber-100 text-amber-800";
-
-    case "approved":
-      return "bg-green-100 text-green-800";
-
-    case "rejected":
-      return "bg-red-100 text-red-800";
-
-    case "cancelled":
-      return "bg-slate-200 text-slate-700";
-
-    case "completed":
-      return "bg-blue-100 text-blue-800";
-
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
 
 
 export default function OwnerBookings() {
@@ -192,7 +166,7 @@ export default function OwnerBookings() {
 
       await refreshBookings();
     } catch (error) {
-      alert(
+      setError(
         error.response?.data?.message ||
           "Unable to approve booking"
       );
@@ -236,7 +210,7 @@ export default function OwnerBookings() {
 
       await refreshBookings();
     } catch (error) {
-      alert(
+      setError(
         error.response?.data?.message ||
           "Unable to reject booking"
       );
@@ -269,7 +243,7 @@ export default function OwnerBookings() {
 
       await refreshBookings();
     } catch (error) {
-      alert(
+      setError(
         error.response?.data?.message ||
           "Unable to complete booking"
       );
@@ -280,11 +254,11 @@ export default function OwnerBookings() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
 
           <div>
 
@@ -297,15 +271,6 @@ export default function OwnerBookings() {
             </p>
 
           </div>
-
-
-          <Link
-            to="/owner/dashboard"
-            className="font-semibold text-blue-600"
-          >
-            ← Dashboard
-          </Link>
-
         </div>
 
 
@@ -426,7 +391,7 @@ export default function OwnerBookings() {
 
 
                         <span
-                          className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusClasses(
+                          className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${getBookingStatusClasses(
                             booking.status
                           )}`}
                         >

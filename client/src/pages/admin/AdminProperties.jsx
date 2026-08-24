@@ -4,10 +4,6 @@ import {
 } from "react";
 
 import {
-  Link,
-} from "react-router-dom";
-
-import {
   getAdminProperties,
 } from "../../api/adminApi";
 
@@ -98,19 +94,11 @@ export default function AdminProperties() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-6xl">
 
-        <Link
-          to="/admin/dashboard"
-          className="font-semibold text-blue-600"
-        >
-          ← Dashboard
-        </Link>
-
-
-        <h1 className="mt-3 text-3xl font-bold">
+        <h1 className="text-3xl font-bold">
           Platform Properties
         </h1>
 
@@ -132,6 +120,14 @@ export default function AdminProperties() {
             </p>
 
           ) : (
+
+            properties.length === 0 ? (
+
+              <div className="mt-6 rounded-xl bg-white p-8 text-center text-slate-600 shadow-sm">
+                No properties are currently registered on the platform.
+              </div>
+
+            ) : (
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
 
@@ -168,16 +164,24 @@ export default function AdminProperties() {
                         }
                       </p>
 
-                      <p className="mt-3 capitalize">
-                        Status:{" "}
-                        <strong>
+                      <div className="mt-3">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold capitalize ${
+                            property.isActive &&
+                            property.status === "published"
+                              ? "bg-green-100 text-green-800"
+                              : property.isActive
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-red-100 text-red-800"
+                          }`}
+                        >
                           {
                             property.isActive
                               ? property.status
                               : "inactive"
                           }
-                        </strong>
-                      </p>
+                        </span>
+                      </div>
 
                       <p className="mt-2 text-sm text-slate-600">
                         {
@@ -205,6 +209,8 @@ export default function AdminProperties() {
               }
 
             </div>
+
+            )
 
           )
         }

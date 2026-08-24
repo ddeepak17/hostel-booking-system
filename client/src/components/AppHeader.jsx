@@ -105,8 +105,11 @@ export default function AppHeader() {
 
         <Link
           to="/"
-          className="text-lg font-black tracking-tight text-slate-900"
+          className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-900"
         >
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+            H
+          </span>
           HostelHub
         </Link>
 

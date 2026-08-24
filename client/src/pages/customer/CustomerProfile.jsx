@@ -2,10 +2,6 @@ import {
   useState,
 } from "react";
 
-import {
-  Link,
-} from "react-router-dom";
-
 import useAuth from "../../hooks/useAuth";
 
 import {
@@ -159,19 +155,11 @@ export default function CustomerProfile() {
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-[calc(100vh-65px)] bg-slate-100 px-4 py-8 sm:px-6">
 
       <div className="mx-auto max-w-2xl">
 
-        <Link
-          to="/customer/dashboard"
-          className="font-semibold text-blue-600"
-        >
-          ← Dashboard
-        </Link>
-
-
-        <div className="mt-4 rounded-xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
 
           <h1 className="text-3xl font-bold">
             My Profile
