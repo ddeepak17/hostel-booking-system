@@ -42,73 +42,107 @@ export default function OwnerProperties() {
   const [
     properties,
     setProperties,
-  ] = useState([]);
+  ] =
+    useState(
+      []
+    );
 
   const [
     form,
     setForm,
-  ] = useState(EMPTY_FORM);
+  ] =
+    useState(
+      EMPTY_FORM
+    );
 
   const [
     showCreateForm,
     setShowCreateForm,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
   const [
     loading,
     setLoading,
-  ] = useState(true);
+  ] =
+    useState(
+      true
+    );
 
   const [
     saving,
     setSaving,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
   const [
     error,
     setError,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
 
   useEffect(() => {
-    let ignore = false;
+    let ignore =
+      false;
+
 
     getOwnerProperties()
-      .then((data) => {
-        if (ignore) {
-          return;
+      .then(
+        (
+          data
+        ) => {
+          if (
+            !ignore
+          ) {
+            setProperties(
+              Array.isArray(
+                data.properties
+              )
+                ? data.properties
+                : []
+            );
+          }
         }
-
-        setProperties(
-          Array.isArray(
-            data.properties
-          )
-            ? data.properties
-            : []
-        );
-      })
-      .catch((error) => {
-        if (ignore) {
-          return;
+      )
+      .catch(
+        (
+          error
+        ) => {
+          if (
+            !ignore
+          ) {
+            setError(
+              getErrorMessage(
+                error,
+                "Unable to load properties"
+              )
+            );
+          }
         }
-
-        console.error(error);
-
-        setError(
-          getErrorMessage(
-            error,
-            "Unable to load properties"
-          )
-        );
-      })
-      .finally(() => {
-        if (!ignore) {
-          setLoading(false);
+      )
+      .finally(
+        () => {
+          if (
+            !ignore
+          ) {
+            setLoading(
+              false
+            );
+          }
         }
-      });
+      );
+
 
     return () => {
-      ignore = true;
+      ignore =
+        true;
     };
   }, []);
 
@@ -116,6 +150,7 @@ export default function OwnerProperties() {
   async function refreshProperties() {
     const data =
       await getOwnerProperties();
+
 
     setProperties(
       Array.isArray(
@@ -133,12 +168,17 @@ export default function OwnerProperties() {
     const {
       name,
       value,
-    } = event.target;
+    } =
+      event.target;
+
 
     setForm(
-      (current) => ({
+      (
+        current
+      ) => ({
         ...current,
-        [name]: value,
+        [name]:
+          value,
       })
     );
   }
@@ -148,6 +188,7 @@ export default function OwnerProperties() {
     event
   ) {
     event.preventDefault();
+
 
     if (
       !form.name.trim() ||
@@ -164,9 +205,16 @@ export default function OwnerProperties() {
       return;
     }
 
+
     try {
-      setSaving(true);
-      setError("");
+      setSaving(
+        true
+      );
+
+      setError(
+        ""
+      );
+
 
       await createOwnerProperty({
         name:
@@ -199,27 +247,32 @@ export default function OwnerProperties() {
           form.amenities
             .split(",")
             .map(
-              (item) =>
+              (
+                item
+              ) =>
                 item.trim()
             )
-            .filter(Boolean),
+            .filter(
+              Boolean
+            ),
 
         status:
           form.status,
       });
 
+
       setForm(
         EMPTY_FORM
       );
+
 
       setShowCreateForm(
         false
       );
 
+
       await refreshProperties();
     } catch (error) {
-      console.error(error);
-
       setError(
         getErrorMessage(
           error,
@@ -227,67 +280,61 @@ export default function OwnerProperties() {
         )
       );
     } finally {
-      setSaving(false);
+      setSaving(
+        false
+      );
     }
   }
 
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
+    <main className="min-h-screen bg-slate-100 p-4 sm:p-8">
 
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
           <div>
 
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">
               My Properties
             </h1>
 
             <p className="mt-2 text-slate-600">
-              Manage properties, buildings, floors, rooms, beds, pricing, and availability.
+              Manage accommodation, pricing, availability, images, and location.
             </p>
 
           </div>
 
 
-          <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => {
+              setShowCreateForm(
+                (
+                  current
+                ) =>
+                  !current
+              );
 
-            <Link
-              to="/owner/dashboard"
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700"
-            >
-              ← Dashboard
-            </Link>
-
-
-            <button
-              onClick={() => {
-                setShowCreateForm(
-                  (current) =>
-                    !current
-                );
-
-                setError("");
-              }}
-              className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white"
-            >
-              {
-                showCreateForm
-                  ? "Close Form"
-                  : "Add Property"
-              }
-            </button>
-
-          </div>
+              setError(
+                ""
+              );
+            }}
+            className="rounded-xl bg-slate-900 px-5 py-2.5 font-bold text-white shadow-sm"
+          >
+            {
+              showCreateForm
+                ? "Close Form"
+                : "Add Property"
+            }
+          </button>
 
         </div>
 
 
         {
           error && (
-            <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
               {error}
             </div>
           )
@@ -301,10 +348,10 @@ export default function OwnerProperties() {
               onSubmit={
                 handleCreateProperty
               }
-              className="mt-8 rounded-xl bg-white p-6 shadow-sm"
+              className="mt-8 rounded-2xl bg-white p-5 shadow-sm sm:p-6"
             >
 
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold">
                 Create Property
               </h2>
 
@@ -312,6 +359,7 @@ export default function OwnerProperties() {
               <div className="mt-5 grid gap-4 md:grid-cols-2">
 
                 <label>
+
                   <span className="mb-1 block text-sm font-semibold">
                     Property Name
                   </span>
@@ -324,13 +372,15 @@ export default function OwnerProperties() {
                     onChange={
                       handleChange
                     }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
                     required
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
                   />
+
                 </label>
 
 
                 <label>
+
                   <span className="mb-1 block text-sm font-semibold">
                     Status
                   </span>
@@ -353,10 +403,12 @@ export default function OwnerProperties() {
                       Published
                     </option>
                   </select>
+
                 </label>
 
 
                 <label className="md:col-span-2">
+
                   <span className="mb-1 block text-sm font-semibold">
                     Description
                   </span>
@@ -372,123 +424,82 @@ export default function OwnerProperties() {
                     rows="3"
                     className="w-full rounded-lg border border-slate-300 px-3 py-2"
                   />
+
                 </label>
 
 
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    Address Line 1
-                  </span>
+                {
+                  [
+                    [
+                      "line1",
+                      "Address Line 1",
+                    ],
+                    [
+                      "line2",
+                      "Address Line 2",
+                    ],
+                    [
+                      "city",
+                      "City",
+                    ],
+                    [
+                      "state",
+                      "State / Province",
+                    ],
+                    [
+                      "postalCode",
+                      "Postal Code",
+                    ],
+                    [
+                      "country",
+                      "Country",
+                    ],
+                  ].map(
+                    ([
+                      field,
+                      label,
+                    ]) => (
 
-                  <input
-                    name="line1"
-                    value={
-                      form.line1
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                    required
-                  />
-                </label>
+                      <label
+                        key={
+                          field
+                        }
+                      >
 
+                        <span className="mb-1 block text-sm font-semibold">
+                          {
+                            label
+                          }
+                        </span>
 
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    Address Line 2
-                  </span>
+                        <input
+                          name={
+                            field
+                          }
+                          value={
+                            form[
+                              field
+                            ]
+                          }
+                          onChange={
+                            handleChange
+                          }
+                          required={
+                            field !==
+                            "line2"
+                          }
+                          className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        />
 
-                  <input
-                    name="line2"
-                    value={
-                      form.line2
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                  />
-                </label>
+                      </label>
 
-
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    City
-                  </span>
-
-                  <input
-                    name="city"
-                    value={
-                      form.city
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                    required
-                  />
-                </label>
-
-
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    State / Province
-                  </span>
-
-                  <input
-                    name="state"
-                    value={
-                      form.state
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                    required
-                  />
-                </label>
-
-
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    Postal Code
-                  </span>
-
-                  <input
-                    name="postalCode"
-                    value={
-                      form.postalCode
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                    required
-                  />
-                </label>
-
-
-                <label>
-                  <span className="mb-1 block text-sm font-semibold">
-                    Country
-                  </span>
-
-                  <input
-                    name="country"
-                    value={
-                      form.country
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                    required
-                  />
-                </label>
+                    )
+                  )
+                }
 
 
                 <label className="md:col-span-2">
+
                   <span className="mb-1 block text-sm font-semibold">
                     Amenities
                   </span>
@@ -505,20 +516,16 @@ export default function OwnerProperties() {
                     className="w-full rounded-lg border border-slate-300 px-3 py-2"
                   />
 
-                  <span className="mt-1 block text-xs text-slate-500">
-                    Separate amenities with commas.
-                  </span>
                 </label>
 
               </div>
 
 
               <button
-                type="submit"
                 disabled={
                   saving
                 }
-                className="mt-6 rounded-lg bg-green-600 px-5 py-2 font-semibold text-white disabled:opacity-50"
+                className="mt-6 rounded-xl bg-green-600 px-5 py-2.5 font-bold text-white disabled:opacity-50"
               >
                 {
                   saving
@@ -543,132 +550,150 @@ export default function OwnerProperties() {
           ) : properties.length ===
             0 ? (
 
-            <div className="mt-8 rounded-xl bg-white p-8 text-center shadow-sm">
+            <div className="mt-8 rounded-2xl bg-white p-10 text-center shadow-sm">
 
               <h2 className="text-xl font-bold">
                 No properties yet
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Create your first property to begin configuring accommodation.
+                Add your first property to begin.
               </p>
 
             </div>
 
           ) : (
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
               {
                 properties.map(
-                  (property) => (
+                  (
+                    property
+                  ) => {
 
-                    <article
-                      key={
-                        property._id
-                      }
-                      className="rounded-xl bg-white p-6 shadow-sm"
-                    >
-
-                      <div className="flex items-start justify-between gap-4">
-
-                        <div>
-
-                          <h2 className="text-xl font-bold text-slate-900">
-                            {
-                              property.name
-                            }
-                          </h2>
-
-                          <p className="mt-1 text-sm text-slate-500">
-                            {
-                              [
-                                property.address?.city,
-                                property.address?.state,
-                                property.address?.country,
-                              ]
-                                .filter(Boolean)
-                                .join(", ")
-                            }
-                          </p>
-
-                        </div>
+                    const heroImage =
+                      property.images?.[0];
 
 
-                        <span
-                          className={
-                            property.isActive
-                              ? "rounded-full bg-green-100 px-3 py-1 text-xs font-semibold capitalize text-green-800"
-                              : "rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800"
-                          }
-                        >
-                          {
-                            property.isActive
-                              ? property.status
-                              : "Inactive"
-                          }
-                        </span>
+                    return (
 
-                      </div>
+                      <article
+                        key={
+                          property._id
+                        }
+                        className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                      >
+
+                        {
+                          heroImage ? (
+
+                            <img
+                              src={
+                                heroImage.url
+                              }
+                              alt={
+                                heroImage.alt ||
+                                property.name
+                              }
+                              className="h-48 w-full object-cover"
+                            />
+
+                          ) : (
+
+                            <div className="flex h-48 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-100 text-sm font-semibold text-slate-500">
+                              No property image
+                            </div>
+
+                          )
+                        }
 
 
-                      {
-                        property.description && (
-                          <p className="mt-4 text-slate-600">
-                            {
-                              property.description
-                            }
-                          </p>
-                        )
-                      }
+                        <div className="p-5">
+
+                          <div className="flex items-start justify-between gap-3">
+
+                            <div>
+
+                              <h2 className="text-xl font-bold">
+                                {
+                                  property.name
+                                }
+                              </h2>
+
+                              <p className="mt-1 text-sm text-slate-500">
+                                {
+                                  [
+                                    property.address
+                                      ?.city,
+                                    property.address
+                                      ?.state,
+                                  ]
+                                    .filter(
+                                      Boolean
+                                    )
+                                    .join(
+                                      ", "
+                                    )
+                                }
+                              </p>
+
+                            </div>
 
 
-                      {
-                        Array.isArray(
-                          property.amenities
-                        ) &&
-                        property.amenities.length >
-                          0 && (
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-
-                            {
-                              property.amenities.map(
-                                (
-                                  amenity
-                                ) => (
-
-                                  <span
-                                    key={
-                                      amenity
-                                    }
-                                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700"
-                                  >
-                                    {
-                                      amenity
-                                    }
-                                  </span>
-
-                                )
-                              )
-                            }
+                            <span
+                              className={
+                                property.isActive
+                                  ? "rounded-full bg-green-100 px-3 py-1 text-xs font-bold capitalize text-green-800"
+                                  : "rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800"
+                              }
+                            >
+                              {
+                                property.isActive
+                                  ? property.status
+                                  : "Inactive"
+                              }
+                            </span>
 
                           </div>
 
-                        )
-                      }
+
+                          {
+                            property.description && (
+                              <p className="mt-4 line-clamp-3 text-sm text-slate-600">
+                                {
+                                  property.description
+                                }
+                              </p>
+                            )
+                          }
 
 
-                      <Link
-                        to={`/owner/properties/${property._id}/manage`}
-                        className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white"
-                      >
-                        Manage Property
-                      </Link>
+                          <div className="mt-5 flex flex-wrap gap-2">
 
-                    </article>
+                            <Link
+                              to={`/owner/properties/${property._id}/manage`}
+                              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-bold text-white"
+                            >
+                              Manage
+                            </Link>
 
-                  )
+
+                            <Link
+                              to={`/owner/properties/${property._id}/media`}
+                              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700"
+                            >
+                              Media & Location
+                            </Link>
+
+                          </div>
+
+                        </div>
+
+                      </article>
+
+                    );
+                  }
                 )
               }
 
