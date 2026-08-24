@@ -15,3 +15,6 @@ dist/
 
 # Logs
 *.log
+
+# Local demo credentials
+DEMO_CREDENTIALS.md
