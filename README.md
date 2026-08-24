@@ -1,85 +1,153 @@
-# PG / Hostel Room Booking System
+# HostelHub
 
-Full-stack MERN hostel accommodation booking platform.
+HostelHub is a full-stack student accommodation platform built with the MERN stack. Students can compare properties and request an available bed, property owners can manage inventory and the booking lifecycle, and platform administrators can oversee users and activity from role-specific dashboards.
 
-## Stack
+The project focuses on the operational details behind accommodation booking: nested property inventory, ownership boundaries, bed-level availability, price snapshots, booking state transitions, and review eligibility.
 
-Frontend: - React - Vite - Tailwind CSS - React Router - Axios
+## Highlights
 
-Backend: - Node.js - Express.js - MongoDB - Mongoose - JWT - bcrypt
+### Students
 
-## Roles
+- Search by name, location, amenity, room type, price, and availability
+- View property media, location, rooms, pricing, deposits, and individual beds
+- Request an available bed for a selected check-in date
+- Track pending, approved, rejected, cancelled, and completed bookings
+- Maintain a profile and review a property after a completed stay
 
--   Customer
--   Property Owner
--   Super Admin
+### Property owners
 
-## Completed Development
+- Create and manage properties, buildings, floors, rooms, and beds
+- Publish or deactivate inventory while retaining booking history
+- Add property images and map coordinates
+- Approve, reject, and complete booking requests
+- View current tenants and active monthly rent
 
-### Day 1
+### Platform administrators
 
-Foundation, deployment, database setup.
+- Monitor platform totals and booking activity
+- Create property-owner accounts
+- Enable or disable customer and owner accounts
+- Review properties and bookings across the platform
 
-### Day 2
+## Technical overview
 
-Authentication, JWT, authorization, protected routes.
+| Area | Technology |
+| --- | --- |
+| Frontend | React 19, React Router, Vite, Tailwind CSS, Axios, Formik, Yup |
+| Backend | Node.js, Express 5, Mongoose |
+| Data | MongoDB Atlas |
+| Authentication | JWT, bcrypt, protected role-based routes |
+| Media and maps | Cloudinary uploads, Google Maps embeds |
+| Security | Helmet, CORS allow-list, request size limits, API and authentication rate limits |
+| Deployment | Vercel frontend, Render API, MongoDB Atlas |
 
-### Day 3
+See [docs/architecture.md](docs/architecture.md) for the data model, authorization boundaries, API modules, and booking transitions.
 
-Property hierarchy and owner authorization.
+## Repository structure
 
-### Day 4
+```text
+hostel-booking-system/
+├── client/                  # React application
+│   └── src/
+│       ├── api/             # Axios client and endpoint wrappers
+│       ├── components/      # Shared navigation
+│       ├── context/         # Authentication state
+│       ├── pages/           # Customer, owner, admin, and auth pages
+│       └── routes/          # Client-side route guards
+├── server/                  # Express API
+│   └── src/
+│       ├── controllers/     # Request and workflow logic
+│       ├── middleware/      # Authentication and role checks
+│       ├── models/          # Mongoose schemas and indexes
+│       ├── routes/          # REST route modules
+│       └── utils/           # Ownership and booking helpers
+└── docs/architecture.md
+```
 
-Booking engine, reservation workflow, tenant tracking.
+## Run locally
 
-### Day 5
+### Requirements
 
-Customer browsing and booking experience.
+- Node.js 20.19 or newer
+- A MongoDB database
+- Optional Cloudinary unsigned upload preset for browser uploads
 
-### Day 6
+### 1. Configure the API
 
-Owner dashboard, bookings, tenants.
+```bash
+cd server
+cp .env.example .env
+npm install
+```
 
-### Day 7
+Set the following values in `server/.env`:
 
-Owner property management: - Properties - Buildings - Floors - Rooms -
-Beds - Pricing - Availability
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | API port, typically `5001` |
+| `NODE_ENV` | `development` or `production` |
+| `CLIENT_URL` | Exact frontend origin allowed by CORS |
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Private token-signing secret (at least 32 characters in production) |
+| `JWT_EXPIRES_IN` | Token lifetime, for example `7d` |
+| `SUPER_ADMIN_NAME` | Name used by the optional admin seed |
+| `SUPER_ADMIN_EMAIL` | Email used by the optional admin seed |
+| `SUPER_ADMIN_PASSWORD` | Password used by the optional admin seed |
 
-### Day 8
+Start the API:
 
-Admin platform and customer enhancements: - Admin dashboard - User
-management - Owner management - Reviews - Search/filtering
+```bash
+npm run dev
+```
 
-### Day 9
+To create or update the configured super-admin account:
 
-Final production pass: - Property media - Image support -
-Location/maps - Navigation improvements - Security hardening - Final QA
+```bash
+npm run seed:admin
+```
 
-## Security
+This is the repository's only seed command; properties, rooms, bookings, and reviews are managed through the application rather than committed demo fixtures.
 
--   JWT authentication
--   bcrypt password hashing
--   Role authorization
--   Resource ownership validation
--   Cross-owner isolation
--   Helmet
--   CORS
--   Rate limiting
+### 2. Configure the frontend
 
-## Deployment
+In another terminal:
 
-    Vercel
-     ↓
-    React Frontend
-     ↓
-    Render API
-     ↓
-    MongoDB Atlas
+```bash
+cd client
+cp .env.example .env
+npm install
+```
 
-## Future Improvements
+Set the following values in `client/.env`:
 
--   Notifications
--   Payments
--   Email verification
--   Password reset
--   More automated testing
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_URL` | API base URL including `/api`, such as `http://localhost:5001/api` |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Optional Cloudinary cloud name |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Optional unsigned upload preset |
+
+Only the Cloudinary cloud name and an unsigned upload preset belong in the browser configuration. Never place a Cloudinary API secret in a `VITE_` variable.
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Open the local URL printed by Vite. `CLIENT_URL` must use the same origin, including whether the hostname is `localhost` or `127.0.0.1`.
+
+## Quality checks
+
+```bash
+cd client
+npm run lint
+npm run build
+
+cd ../server
+node --check server.js
+find src -name '*.js' -exec node --check {} \;
+```
+
+## Intentional scope
+
+The current portfolio version demonstrates the complete booking and management workflow without introducing payment or messaging complexity. Payments, notifications, email verification, and password recovery are sensible production extensions, but are intentionally outside the present feature set.
