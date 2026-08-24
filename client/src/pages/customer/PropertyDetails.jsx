@@ -257,12 +257,20 @@ export default function PropertyDetails() {
 
 
   async function showBeds(
-    roomId
+    roomId,
+    {
+      preserveFeedback =
+        false,
+    } = {}
   ) {
     try {
-      setFeedback(
-        null
-      );
+      if (
+        !preserveFeedback
+      ) {
+        setFeedback(
+          null
+        );
+      }
 
       const data =
         await getRoomBeds(
@@ -357,7 +365,11 @@ export default function PropertyDetails() {
 
 
       await showBeds(
-        roomId
+        roomId,
+        {
+          preserveFeedback:
+            true,
+        }
       );
     } catch (error) {
       setFeedback({
@@ -893,7 +905,21 @@ export default function PropertyDetails() {
                           room._id
                         ] && (
 
-                          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          beds[
+                            room._id
+                          ].length ===
+                          0 ? (
+
+                            <p
+                              role="status"
+                              className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
+                            >
+                              No active beds are currently listed for this room.
+                            </p>
+
+                          ) : (
+
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2">
 
                             {
                               beds[
@@ -960,8 +986,9 @@ export default function PropertyDetails() {
                               )
                             }
 
-                          </div>
+                            </div>
 
+                          )
                         )
                       }
 
