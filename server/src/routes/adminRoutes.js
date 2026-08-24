@@ -8,6 +8,10 @@ import {
 } from "../middleware/authMiddleware.js";
 
 import {
+  validateObjectIdParam,
+} from "../middleware/validateObjectId.js";
+
+import {
   createOwner,
   getOwners,
 } from "../controllers/adminUserController.js";
@@ -23,6 +27,12 @@ import {
 
 const router =
   Router();
+
+
+router.param(
+  "userId",
+  validateObjectIdParam
+);
 
 
 router.use(

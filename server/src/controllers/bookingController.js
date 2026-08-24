@@ -342,8 +342,14 @@ export async function cancelMyBooking(
   req,
   res
 ) {
+  let previousBooking =
+    null;
+
+  let transitionComplete =
+    false;
+
   try {
-    const booking =
+    previousBooking =
       await Booking.findOneAndUpdate(
         {
           _id:
@@ -379,11 +385,12 @@ export async function cancelMyBooking(
           },
         },
         {
-          new: true,
+          new: false,
+          runValidators: true,
         }
       );
 
-    if (!booking) {
+    if (!previousBooking) {
       const existing =
         await Booking.findOne({
           _id:
@@ -409,30 +416,75 @@ export async function cancelMyBooking(
       });
     }
 
-    await Bed.updateOne(
-      {
-        _id:
-          booking.bed,
+    const expectedBedStatus =
+      previousBooking.status ===
+      "pending"
+        ? "reserved"
+        : "occupied";
 
-        status: {
-          $in: [
-            "reserved",
-            "occupied",
-          ],
-        },
-      },
-      {
-        $set: {
+    const bedResult =
+      await Bed.updateOne(
+        {
+          _id:
+            previousBooking.bed,
+
           status:
-            "available",
+            expectedBedStatus,
         },
-      }
-    );
+        {
+          $set: {
+            status:
+              "available",
+          },
+        }
+      );
+
+    if (
+      bedResult.matchedCount !==
+      1
+    ) {
+      await Booking.updateOne(
+        {
+          _id:
+            previousBooking._id,
+          customer:
+            req.user._id,
+          status:
+            "cancelled",
+          isActiveBooking:
+            false,
+        },
+        {
+          $set: {
+            status:
+              previousBooking.status,
+            isActiveBooking:
+              true,
+            cancelledAt:
+              previousBooking.cancelledAt,
+            cancellationReason:
+              previousBooking.cancellationReason,
+          },
+        }
+      );
+
+      previousBooking =
+        null;
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "The bed state did not match this booking. No changes were applied.",
+      });
+    }
+
+    transitionComplete =
+      true;
 
     const populatedBooking =
       await populateBooking(
         Booking.findById(
-          booking._id
+          previousBooking._id
         )
       );
 
@@ -444,6 +496,43 @@ export async function cancelMyBooking(
         populatedBooking,
     });
   } catch (error) {
+    if (
+      previousBooking &&
+      !transitionComplete
+    ) {
+      try {
+        await Booking.updateOne(
+          {
+            _id:
+              previousBooking._id,
+            customer:
+              req.user._id,
+            status:
+              "cancelled",
+            isActiveBooking:
+              false,
+          },
+          {
+            $set: {
+              status:
+                previousBooking.status,
+              isActiveBooking:
+                true,
+              cancelledAt:
+                previousBooking.cancelledAt,
+              cancellationReason:
+                previousBooking.cancellationReason,
+            },
+          }
+        );
+      } catch (rollbackError) {
+        console.error(
+          "Booking cancellation rollback failed:",
+          rollbackError
+        );
+      }
+    }
+
     return handleBookingError(
       res,
       error,

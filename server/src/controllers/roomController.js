@@ -5,6 +5,9 @@ import {
   getOwnedFloor,
   getOwnedRoom,
 } from "../utils/propertyOwnership.js";
+import {
+  sendControllerError,
+} from "../utils/controllerError.js";
 
 export async function createRoom(
   req,
@@ -58,12 +61,11 @@ export async function createRoom(
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message:
-        error.message ||
-        "Unable to create room",
-    });
+    return sendControllerError(
+      res,
+      error,
+      "Unable to create room"
+    );
   }
 }
 
@@ -181,12 +183,11 @@ export async function updateRoom(
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message:
-        error.message ||
-        "Unable to update room",
-    });
+    return sendControllerError(
+      res,
+      error,
+      "Unable to update room"
+    );
   }
 }
 

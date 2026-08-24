@@ -134,9 +134,12 @@ export async function approveBooking(
   req,
   res
 ) {
+  let occupiedBedId = null;
+  let transitionComplete = false;
+
   try {
     const booking =
-      await Booking.findOneAndUpdate(
+      await Booking.findOne(
         {
           _id:
             req.params.bookingId,
@@ -149,22 +152,6 @@ export async function approveBooking(
 
           isActiveBooking:
             true,
-        },
-        {
-          $set: {
-            status:
-              "approved",
-
-            approvedAt:
-              new Date(),
-
-            ownerNote:
-              req.body?.note ||
-              "",
-          },
-        },
-        {
-          new: true,
         }
       );
 
@@ -203,14 +190,62 @@ export async function approveBooking(
       return res.status(409).json({
         success: false,
         message:
-          "Booking was approved but the bed state requires review",
+          "The bed state did not match this booking. No changes were applied.",
       });
     }
+
+    occupiedBedId = bed._id;
+
+    const approvedBooking =
+      await Booking.findOneAndUpdate(
+        {
+          _id: booking._id,
+          owner: req.user._id,
+          status: "pending",
+          isActiveBooking: true,
+        },
+        {
+          $set: {
+            status: "approved",
+            approvedAt: new Date(),
+            ownerNote:
+              req.body?.note || "",
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    if (!approvedBooking) {
+      await Bed.updateOne(
+        {
+          _id: occupiedBedId,
+          status: "occupied",
+        },
+        {
+          $set: {
+            status: "reserved",
+          },
+        }
+      );
+
+      occupiedBedId = null;
+
+      return transitionFailure(
+        req,
+        res,
+        "approved"
+      );
+    }
+
+    transitionComplete = true;
 
     const populatedBooking =
       await populateOwnerBooking(
         Booking.findById(
-          booking._id
+          approvedBooking._id
         )
       );
 
@@ -222,6 +257,30 @@ export async function approveBooking(
         populatedBooking,
     });
   } catch (error) {
+    if (
+      occupiedBedId &&
+      !transitionComplete
+    ) {
+      try {
+        await Bed.updateOne(
+          {
+            _id: occupiedBedId,
+            status: "occupied",
+          },
+          {
+            $set: {
+              status: "reserved",
+            },
+          }
+        );
+      } catch (rollbackError) {
+        console.error(
+          "Booking approval rollback failed:",
+          rollbackError
+        );
+      }
+    }
+
     console.error(
       "Approve booking error:",
       error
@@ -239,8 +298,11 @@ export async function rejectBooking(
   req,
   res
 ) {
+  let previousBooking = null;
+  let transitionComplete = false;
+
   try {
-    const booking =
+    previousBooking =
       await Booking.findOneAndUpdate(
         {
           _id:
@@ -272,11 +334,12 @@ export async function rejectBooking(
           },
         },
         {
-          new: true,
+          new: false,
+          runValidators: true,
         }
       );
 
-    if (!booking) {
+    if (!previousBooking) {
       return transitionFailure(
         req,
         res,
@@ -284,25 +347,67 @@ export async function rejectBooking(
       );
     }
 
-    await Bed.updateOne(
-      {
-        _id:
-          booking.bed,
-        status:
-          "reserved",
-      },
-      {
-        $set: {
+    const bedResult =
+      await Bed.updateOne(
+        {
+          _id:
+            previousBooking.bed,
           status:
-            "available",
+            "reserved",
+          isActive:
+            true,
         },
-      }
-    );
+        {
+          $set: {
+            status:
+              "available",
+          },
+        }
+      );
+
+    if (
+      bedResult.matchedCount !==
+      1
+    ) {
+      await Booking.updateOne(
+        {
+          _id:
+            previousBooking._id,
+          owner:
+            req.user._id,
+          status:
+            "rejected",
+          isActiveBooking:
+            false,
+        },
+        {
+          $set: {
+            status: previousBooking.status,
+            isActiveBooking:
+              previousBooking.isActiveBooking,
+            rejectedAt:
+              previousBooking.rejectedAt,
+            ownerNote:
+              previousBooking.ownerNote,
+          },
+        }
+      );
+
+      previousBooking = null;
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "The bed state did not match this booking. No changes were applied.",
+      });
+    }
+
+    transitionComplete = true;
 
     const populatedBooking =
       await populateOwnerBooking(
         Booking.findById(
-          booking._id
+          previousBooking._id
         )
       );
 
@@ -314,6 +419,38 @@ export async function rejectBooking(
         populatedBooking,
     });
   } catch (error) {
+    if (
+      previousBooking &&
+      !transitionComplete
+    ) {
+      try {
+        await Booking.updateOne(
+          {
+            _id: previousBooking._id,
+            owner: req.user._id,
+            status: "rejected",
+            isActiveBooking: false,
+          },
+          {
+            $set: {
+              status: previousBooking.status,
+              isActiveBooking:
+                previousBooking.isActiveBooking,
+              rejectedAt:
+                previousBooking.rejectedAt,
+              ownerNote:
+                previousBooking.ownerNote,
+            },
+          }
+        );
+      } catch (rollbackError) {
+        console.error(
+          "Booking rejection rollback failed:",
+          rollbackError
+        );
+      }
+    }
+
     console.error(
       "Reject booking error:",
       error
@@ -331,8 +468,11 @@ export async function completeBooking(
   req,
   res
 ) {
+  let previousBooking = null;
+  let transitionComplete = false;
+
   try {
-    const booking =
+    previousBooking =
       await Booking.findOneAndUpdate(
         {
           _id:
@@ -360,11 +500,12 @@ export async function completeBooking(
           },
         },
         {
-          new: true,
+          new: false,
+          runValidators: true,
         }
       );
 
-    if (!booking) {
+    if (!previousBooking) {
       return transitionFailure(
         req,
         res,
@@ -372,25 +513,65 @@ export async function completeBooking(
       );
     }
 
-    await Bed.updateOne(
-      {
-        _id:
-          booking.bed,
-        status:
-          "occupied",
-      },
-      {
-        $set: {
+    const bedResult =
+      await Bed.updateOne(
+        {
+          _id:
+            previousBooking.bed,
           status:
-            "available",
+            "occupied",
+          isActive:
+            true,
         },
-      }
-    );
+        {
+          $set: {
+            status:
+              "available",
+          },
+        }
+      );
+
+    if (
+      bedResult.matchedCount !==
+      1
+    ) {
+      await Booking.updateOne(
+        {
+          _id:
+            previousBooking._id,
+          owner:
+            req.user._id,
+          status:
+            "completed",
+          isActiveBooking:
+            false,
+        },
+        {
+          $set: {
+            status: previousBooking.status,
+            isActiveBooking:
+              previousBooking.isActiveBooking,
+            completedAt:
+              previousBooking.completedAt,
+          },
+        }
+      );
+
+      previousBooking = null;
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "The bed state did not match this booking. No changes were applied.",
+      });
+    }
+
+    transitionComplete = true;
 
     const populatedBooking =
       await populateOwnerBooking(
         Booking.findById(
-          booking._id
+          previousBooking._id
         )
       );
 
@@ -402,6 +583,36 @@ export async function completeBooking(
         populatedBooking,
     });
   } catch (error) {
+    if (
+      previousBooking &&
+      !transitionComplete
+    ) {
+      try {
+        await Booking.updateOne(
+          {
+            _id: previousBooking._id,
+            owner: req.user._id,
+            status: "completed",
+            isActiveBooking: false,
+          },
+          {
+            $set: {
+              status: previousBooking.status,
+              isActiveBooking:
+                previousBooking.isActiveBooking,
+              completedAt:
+                previousBooking.completedAt,
+            },
+          }
+        );
+      } catch (rollbackError) {
+        console.error(
+          "Booking completion rollback failed:",
+          rollbackError
+        );
+      }
+    }
+
     console.error(
       "Complete booking error:",
       error

@@ -6,6 +6,10 @@ import {
 } from "../middleware/authMiddleware.js";
 
 import {
+  validateObjectIdParam,
+} from "../middleware/validateObjectId.js";
+
+import {
   createProperty,
   getMyProperties,
   getMyProperty,
@@ -51,6 +55,20 @@ import {
 } from "../controllers/ownerBookingController.js";
 
 const router = Router();
+
+for (const parameter of [
+  "propertyId",
+  "buildingId",
+  "floorId",
+  "roomId",
+  "bedId",
+  "bookingId",
+]) {
+  router.param(
+    parameter,
+    validateObjectIdParam
+  );
+}
 
 /*
   Every route below this point requires:

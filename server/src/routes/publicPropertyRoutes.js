@@ -1,23 +1,33 @@
 import { Router } from "express";
 
 import {
- getPublicProperties,
- getPublicProperty,
+  getPublicProperties,
+  getPublicProperty,
 } from "../controllers/publicPropertyController.js";
+
+import {
+  validateObjectIdParam,
+} from "../middleware/validateObjectId.js";
 
 
 const router = Router();
 
 
-router.get(
- "/",
- getPublicProperties
+router.param(
+  "propertyId",
+  validateObjectIdParam
 );
 
 
 router.get(
- "/:propertyId",
- getPublicProperty
+  "/",
+  getPublicProperties
+);
+
+
+router.get(
+  "/:propertyId",
+  getPublicProperty
 );
 
 

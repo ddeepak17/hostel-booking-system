@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "hostelhub-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "REST API for the HostelHub student accommodation platform",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,8 +9,12 @@
     "start": "node server.js",
     "seed:admin": "node src/scripts/seedSuperAdmin.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "hostel",
+    "booking",
+    "express",
+    "mongodb"
+  ],
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",

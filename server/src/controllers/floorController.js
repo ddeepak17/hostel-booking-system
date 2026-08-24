@@ -4,6 +4,9 @@ import {
   getOwnedBuilding,
   getOwnedFloor,
 } from "../utils/propertyOwnership.js";
+import {
+  sendControllerError,
+} from "../utils/controllerError.js";
 
 export async function createFloor(
   req,
@@ -48,12 +51,11 @@ export async function createFloor(
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message:
-        error.message ||
-        "Unable to create floor",
-    });
+    return sendControllerError(
+      res,
+      error,
+      "Unable to create floor"
+    );
   }
 }
 

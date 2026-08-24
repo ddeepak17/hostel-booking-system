@@ -8,10 +8,32 @@ export async function getPropertyReviews(
   res
 ) {
   try {
+    const property =
+      await Property.findOne({
+        _id:
+          req.params.propertyId,
+        status:
+          "published",
+        isActive:
+          true,
+      }).select(
+        "_id"
+      );
+
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Property not found",
+      });
+    }
+
+
     const reviews =
       await Review.find({
         property:
-          req.params.propertyId,
+          property._id,
       })
         .populate(
           "customer",
@@ -53,7 +75,13 @@ export async function getPropertyReviews(
       reviews,
     });
   } catch (error) {
-    return res.status(400).json({
+    console.error(
+      "Get reviews error:",
+      error
+    );
+
+
+    return res.status(500).json({
       success: false,
       message:
         "Unable to retrieve reviews",
@@ -182,16 +210,48 @@ export async function savePropertyReview(
       review,
     });
   } catch (error) {
+    if (
+      error.name ===
+      "ValidationError"
+    ) {
+      const messages =
+        Object.values(
+          error.errors
+        ).map(
+          (item) =>
+            item.message
+        );
+
+
+      return res.status(400).json({
+        success: false,
+        message:
+          messages[0],
+      });
+    }
+
+
+    if (
+      error.code ===
+      11000
+    ) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "A review already exists for this stay",
+      });
+    }
+
+
     console.error(
       "Save review error:",
       error
     );
 
 
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message ||
         "Unable to save review",
     });
   }

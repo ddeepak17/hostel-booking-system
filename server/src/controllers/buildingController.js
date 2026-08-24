@@ -4,6 +4,9 @@ import {
   getOwnedProperty,
   getOwnedBuilding,
 } from "../utils/propertyOwnership.js";
+import {
+  sendControllerError,
+} from "../utils/controllerError.js";
 
 export async function createBuilding(
   req,
@@ -47,12 +50,11 @@ export async function createBuilding(
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message:
-        error.message ||
-        "Unable to create building",
-    });
+    return sendControllerError(
+      res,
+      error,
+      "Unable to create building"
+    );
   }
 }
 

@@ -6,6 +6,10 @@ import {
 } from "../middleware/authMiddleware.js";
 
 import {
+  validateObjectIdParam,
+} from "../middleware/validateObjectId.js";
+
+import {
   createBooking,
   getMyBookings,
   getMyBooking,
@@ -13,6 +17,11 @@ import {
 } from "../controllers/bookingController.js";
 
 const router = Router();
+
+router.param(
+  "bookingId",
+  validateObjectIdParam
+);
 
 router.use(
   protect,

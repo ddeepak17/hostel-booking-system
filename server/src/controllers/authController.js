@@ -30,8 +30,14 @@ export async function register(
 
 
     if (
-      !name ||
-      !email ||
+      typeof name !==
+        "string" ||
+      !name.trim() ||
+      typeof email !==
+        "string" ||
+      !email.trim() ||
+      typeof password !==
+        "string" ||
       !password
     ) {
       return res.status(400).json({
@@ -145,7 +151,11 @@ export async function login(
 
 
     if (
-      !email ||
+      typeof email !==
+        "string" ||
+      !email.trim() ||
+      typeof password !==
+        "string" ||
       !password
     ) {
       return res.status(400).json({

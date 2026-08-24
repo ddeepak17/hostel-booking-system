@@ -4,6 +4,9 @@ import {
   getOwnedRoom,
   getOwnedBed,
 } from "../utils/propertyOwnership.js";
+import {
+  sendControllerError,
+} from "../utils/controllerError.js";
 
 export async function createBed(
   req,
@@ -64,12 +67,11 @@ export async function createBed(
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message:
-        error.message ||
-        "Unable to create bed",
-    });
+    return sendControllerError(
+      res,
+      error,
+      "Unable to create bed"
+    );
   }
 }
 

@@ -8,6 +8,10 @@ import {
 } from "../middleware/authMiddleware.js";
 
 import {
+  validateObjectIdParam,
+} from "../middleware/validateObjectId.js";
+
+import {
   getPropertyReviews,
   savePropertyReview,
 } from "../controllers/reviewController.js";
@@ -15,6 +19,12 @@ import {
 
 const router =
   Router();
+
+
+router.param(
+  "propertyId",
+  validateObjectIdParam
+);
 
 
 router.get(
